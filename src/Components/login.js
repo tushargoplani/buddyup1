@@ -8,13 +8,20 @@ import Chatpage from './chatpage'
 
 function Login() {
 
+  function goToSignup(){
+      var Login = document.getElementById('mainlogin');
+      // var Signup = document.getElementById('mainsignup');
+      Login.style.display = "none";
+      // Signup.style.display = "block";
+  }
+
   function funSignIn(){
     var Login = document.getElementById('mainlogin');
     Login.style.display = "none";
   }
 
     return (
-    <Router>
+    // <Router>
     <React.Fragment>
 
      <div id="mainlogin">
@@ -30,7 +37,7 @@ function Login() {
           <a href="">Forgot Password ?</a><br/><br/>
           <button> <NavLink exact to="/buddyup-chat" onClick={funSignIn}>Sign in </NavLink> </button>
         </form>  
-        <div id="createact">Don't have account? <a href="#">Create Account</a></div>
+        <div id="createact">Don't have account? <NavLink exact to="/create-account" onClick={goToSignup}>Create Account</NavLink></div>
       </div>
     </div>
     
@@ -40,12 +47,7 @@ function Login() {
         <p>Enter your personal details and start your journey with <b>BuddyUp</b> today.</p> <br/> <br/> 
         {/* <button><NavLink class="text-muted" to="/create-account">Sign up</NavLink></button> */}
 
-        <button ><NavLink exact to="/create-account" onClick={() => {
-                                var Login = document.getElementById('mainlogin');
-                                // var Signup = document.getElementById('mainsignup');
-                                Login.style.display = "none";
-                                // Signup.style.display = "block";
-                            }}>Sign up</NavLink> </button>
+        <button ><NavLink exact to="/create-account" onClick={goToSignup}>Sign up</NavLink> </button>
 
       </div>
     </div>
@@ -53,13 +55,13 @@ function Login() {
 
 <div>
 <Switch>
-    <Route path="/create-account" exact component = {Signup}/>
-    <Route path="/buddyup-chat" exact component = {Chatpage}/>
+     <Route path="/create-account" exact component = {Signup}/>
+     <Route path="/buddyup-chat" exact component = {Chatpage}/>
 </Switch>
 </div>
 
 </React.Fragment>
-</Router>
+// </Router>
     )
 }
 
