@@ -4,7 +4,7 @@ import {BrowserRouter as Router,Switch,Route,NavLink} from 'react-router-dom';
 import Login from './login';
 import axios from 'axios';
 
-function Signup() {
+function Signup(props) {
 
     function goToSignin(){
         var Signup = document.getElementById('mainsignup');
@@ -13,10 +13,10 @@ function Signup() {
         // Login.style.display = "block";
     }
 
-    function redirect(){
-      var Signup = document.getElementById('mainsignup');
-      Signup.style.display = "none";
-    }
+    // function redirect(){
+    //   var Signup = document.getElementById('mainsignup');
+    //   Signup.style.display = "none";
+    // }
 
     const [uname, setuname] = useState("");
     const [uemail, setuemail] = useState("");
@@ -29,19 +29,74 @@ function Signup() {
       e.target.name==="Upassword" && setupassword(e.target.value);
       e.target.name==="Uusername" && setuusername(e.target.value);
   }
-  function sendData() {
-      // alert(uname);
-      // alert(uemail);
-      // alert(upassword);
-      // alert(uusername);
+
+
+  function validate(){
+    var isvalid=true;
+
+    // validate for Name
+    var name = document.getElementsByName('Uname').value;       
+    if(name=="" || name==null)
+    {
+        isvalid=false;
+        alert("please enter name");
+    }
+
+    //validate for email
+    var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var email = document.getElementsByName('Uemail').value;
+    console.log(emailregex.test(email));
+    if(!emailregex.test(email)){
+      alert("Email is not valid");
+      isvalid=false;
+    }
+    
+    //validate for username
+    var username = document.getElementsByName('Uusername').value;       
+    if(username=="" || username==null)
+    {
+        isvalid=false;
+        alert("please enter username");
+    }
+
+    //validate for password
+    var passregex = /(?=(.*[0-9]))(?=.*[\!@#$%^&*()\\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}/ ;
+    var password = document.getElementsByName('Upassword').value;
+    console.log(passregex.test(password));
+    if(!passregex.test(password)){
+        alert("Password should have 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character and be at least 8 characters long");
+        isvalid=false;
+    }
+
+
+
+
+    if(isvalid==true){
       var s = {uname,uemail,uusername,upassword};
       console.log(s);
 
       axios.post('http://localhost:3000/create-account',s).then((res)=>{
             alert(res.data.data);
+            props.history.push("/");
         }) 
+    }
+}
+
+
+
+  // function sendData() {
+  //     // alert(uname);
+  //     // alert(uemail);
+  //     // alert(upassword);
+  //     // alert(uusername);
+  //     var s = {uname,uemail,uusername,upassword};
+  //     console.log(s);
+
+  //     axios.post('http://localhost:3000/create-account',s).then((res)=>{
+  //           alert(res.data.data);
+  //       }) 
   
-  }
+  // }
     return (
       // <Router>
       <React.Fragment>
@@ -60,9 +115,10 @@ function Signup() {
           <input name="Uusername" value={uusername} onChange={(e)=>{setValue(e);}} type="text" placeholder="Username"/><br/> <br/>
           <i class="fa fa-key"></i>
           <input name="Upassword" value={upassword} onChange={(e)=>{setValue(e);}} type="password" placeholder="Set Password"/> <br/><br/> 
-          <button onClick={sendData}> <NavLink exact to="/" onClick={redirect}>  Sign up  </NavLink>  </button>
+          {/* <button onClick={sendData}> <NavLink exact to="/" onClick={redirect}>  Sign up  </NavLink>  </button> */}
+          <button onClick={validate}>  Sign up </button>
         </form>   <br/> <br/> 
-        <div id="createact">Have an account? <NavLink exact to="/" onClick={goToSignin}>Sign in</NavLink></div>
+        <div id="createact">Have an account? <NavLink exact to="/" onClick={goToSignin} class="text-primary">Sign in</NavLink></div>
       </div>
     </div>
     

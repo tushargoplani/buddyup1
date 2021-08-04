@@ -3,6 +3,8 @@ var cors = require('cors');
 var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
+var nodemailer = require('nodemailer');
+
 
 
 
@@ -25,11 +27,15 @@ client.connect((err,db) => {
 })
 
 
+
+
+
+
 // APIs
 
 app.get('/list-account' , (req,res)=>{
-    var studentCollection = connection.db('buddyup').collection('users');
-    studentCollection.find().toArray((err,docs)=>
+    var userCollection = connection.db('buddyup').collection('users');
+    userCollection.find().toArray((err,docs)=>
     {
         if(!err){
             res.send({status:"OK" , data:docs})
@@ -40,13 +46,14 @@ app.get('/list-account' , (req,res)=>{
     })
 });
 
-
 app.post('/create-account', bodyParser.json() ,(req,res)=>{
     var userCollection = connection.db('buddyup').collection('users');
     userCollection.insert(req.body ,(err,result)=>
     {
         if(!err){
             res.send({status:"OK" , data:"Account Created successfully 💖"})
+            sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.uemail, "Welcome to buddyup", `Registration successfully   ` )
+
         }
         else{
             res.send({status:"Failed" , data:err})
@@ -54,21 +61,65 @@ app.post('/create-account', bodyParser.json() ,(req,res)=>{
     })
 });
 
-app.post('/login', bodyParser.json() ,(req,res)=>{ 
+// app.post('/login', bodyParser.json() ,(req,res)=>{ 
 
-    const collection = connection.db('buddyup').collection('users');
+//     const userCollection = connection.db('buddyup').collection('users');
 
-    collection.find(req.body).toArray((err,docs)=>{
-        if(!err && docs.length>0)
+//     userCollection.find(req.body).toArray((err,docs)=>{
+//         if(!err && docs.length>0)
+//         {
+
+//             res.send({status:"ok", data:docs});
+//         }
+//         else{
+//             res.send({status:"failed", data:"some error occured"});
+//         }
+//     })
+// });
+
+
+
+
+
+
+function sendMail(from, appPassword, to, subject,  htmlmsg)
+{
+    let transporter=nodemailer.createTransport(
         {
+            host:"smtp.gmail.com",
+            port:587,
+            secure:false,
+            auth:
+            {
+             //  user:"weforwomen01@gmail.com",
+             //  pass:""
+             user:from,
+              pass:appPassword
+              
+    
+            }
+        }
+      );
+    let mailOptions=
+    {
+       from:from ,
+       to:to,
+       subject:subject,
+       html:htmlmsg
+    };
+    transporter.sendMail(mailOptions ,function(error,info)
+    {
+      if(error)
+      {
+        console.log(error);
+      }
+      else
+      {
+        console.log('Email sent:'+info.response);
+      }
+    });
+}
 
-            res.send({status:"ok", data:docs});
-        }
-        else{
-            res.send({status:"failed", data:"some error occured"});
-        }
-    })
-});
 
 
 
