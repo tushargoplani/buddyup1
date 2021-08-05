@@ -73,7 +73,7 @@ function Signup(props) {
 
     if(isvalid==true){
       var s = {uname,uemail,uusername,upassword};
-      console.log(s);
+      // console.log(s);
 
       axios.post('http://localhost:3000/create-account',s).then((res)=>{
             alert(res.data.data);
@@ -116,7 +116,7 @@ function Signup(props) {
           <i class="fa fa-key"></i>
           <input name="Upassword" value={upassword} onChange={(e)=>{setValue(e);}} type="password" placeholder="Set Password"/> <br/><br/> 
           {/* <button onClick={sendData}> <NavLink exact to="/" onClick={redirect}>  Sign up  </NavLink>  </button> */}
-          <button onClick={validate}>  Sign up </button>
+          <button type="button" onClick={validate}>  Sign up </button>
         </form>   <br/> <br/> 
         <div id="createact">Have an account? <NavLink exact to="/" onClick={goToSignin} class="text-primary">Sign in</NavLink></div>
       </div>
