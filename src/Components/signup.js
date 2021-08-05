@@ -35,8 +35,8 @@ function Signup(props) {
     var isvalid=true;
 
     // validate for Name
-    var name = document.getElementsByName('Uname').value;       
-    if(name=="" || name==null)
+    // var name = document.getElementsByName('Uname').value;       
+    if(uname=="" || uname==null)
     {
         isvalid=false;
         alert("please enter name");
@@ -44,16 +44,16 @@ function Signup(props) {
 
     //validate for email
     var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    var email = document.getElementsByName('Uemail').value;
-    console.log(emailregex.test(email));
-    if(!emailregex.test(email)){
+    // var email = document.getElementsByName('Uemail').value;
+    // console.log(emailregex.test(email));
+    if(!emailregex.test(uemail)){
       alert("Email is not valid");
       isvalid=false;
     }
     
     //validate for username
-    var username = document.getElementsByName('Uusername').value;       
-    if(username=="" || username==null)
+    // var username = document.getElementsByName('Uusername').value;       
+    if(uusername=="" || uusername==null)
     {
         isvalid=false;
         alert("please enter username");
@@ -61,9 +61,9 @@ function Signup(props) {
 
     //validate for password
     var passregex = /(?=(.*[0-9]))(?=.*[\!@#$%^&*()\\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}/ ;
-    var password = document.getElementsByName('Upassword').value;
-    console.log(passregex.test(password));
-    if(!passregex.test(password)){
+    // var password = document.getElementsByName('Upassword').value;
+    // console.log(passregex.test(password));
+    if(!passregex.test(upassword)){
         alert("Password should have 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character and be at least 8 characters long");
         isvalid=false;
     }
