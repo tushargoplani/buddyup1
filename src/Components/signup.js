@@ -58,6 +58,13 @@ function Signup(props) {
         isvalid=false;
         alert("please enter username");
     }
+    var userregex=/^[a-z0-9_\.]+$/;
+    if(!userregex.test(uusername)){
+      alert("Usernames can only have: Lowercase Letters (a-z), Numbers (0-9), Dots (.), Underscores (_)");
+      isvalid = false;
+    }
+
+
 
     //validate for password
     var passregex = /(?=(.*[0-9]))(?=.*[\!@#$%^&*()\\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}/ ;
@@ -83,20 +90,6 @@ function Signup(props) {
 }
 
 
-
-  // function sendData() {
-  //     // alert(uname);
-  //     // alert(uemail);
-  //     // alert(upassword);
-  //     // alert(uusername);
-  //     var s = {uname,uemail,uusername,upassword};
-  //     console.log(s);
-
-  //     axios.post('http://localhost:3000/create-account',s).then((res)=>{
-  //           alert(res.data.data);
-  //       }) 
-  
-  // }
     return (
       // <Router>
       <React.Fragment>
@@ -108,11 +101,11 @@ function Signup(props) {
         <h2>Create your account</h2>
         <form action="">
           <i class="fa fa-vcard"></i>
-          <input name="Uname" value={uname} onChange={(e)=>{setValue(e);}} type="text" placeholder="Name"/> <br/><br/>
+          <input name="Uname" value={uname} onChange={(e)=>{setValue(e);}} type="text" placeholder="Name" /> <br/><br/>
           <i class="fa fa-envelope"></i>
           <input name="Uemail" value={uemail} onChange={(e)=>{setValue(e);}} type="email" placeholder="Email"/> <br/><br/>
           <i class="fa fa-user"></i>
-          <input name="Uusername" value={uusername} onChange={(e)=>{setValue(e);}} type="text" placeholder="Username"/><br/> <br/>
+          <input name="Uusername" value={uusername} onChange={(e)=>{setValue(e);}} type="text" placeholder="Username" class="lowercase" /><br/> <br/>
           <i class="fa fa-key"></i>
           <input name="Upassword" value={upassword} onChange={(e)=>{setValue(e);}} type="password" placeholder="Set Password"/> <br/><br/> 
           {/* <button onClick={sendData}> <NavLink exact to="/" onClick={redirect}>  Sign up  </NavLink>  </button> */}

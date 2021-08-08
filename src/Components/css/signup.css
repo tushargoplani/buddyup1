@@ -70,6 +70,7 @@
 
 
 
+
   .right{
     width: 35%;
     height: 100%;
@@ -152,3 +153,8 @@
         margin-left: 2.5%;
       }
     }
+
+
+.lowercase{
+  text-transform: lowercase;
+}

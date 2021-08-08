@@ -62,11 +62,10 @@ function Login(props) {
         <h2>Sign in your account</h2>
         <form action="">
           <i class="fa fa-user"></i>
-          <input id="username" type="text" placeholder="Enter your username"/><br/> <br/> <br/>
+          <input id="username" type="text" placeholder="Enter your username" class="lowercase"/><br/> <br/> <br/>
           <i class="fa fa-key"></i>
           <input id="password" type="password" placeholder="Enter your password"/> <br/><br/> 
           <a href="">Forgot Password ?</a><br/><br/>
-          {/* <button> <NavLink exact to="/buddyup-chat" onClick={Auth}>Sign in </NavLink> </button> */}
           <button onClick={Auth}>Sign in  </button>
         </form>  
         <div id="createact">Don't have account? <NavLink exact to="/create-account" onClick={goToSignup} class="text-primary">Create Account</NavLink></div>
@@ -77,8 +76,6 @@ function Login(props) {
       <div id="signup">
         <h1>Hello Dear!</h1> <br/> <br/>  
         <p>Enter your personal details and start your journey with <b>BuddyUp</b> today.</p> <br/> <br/> 
-        {/* <button><NavLink class="text-muted" to="/create-account">Sign up</NavLink></button> */}
-
         <button ><NavLink exact to="/create-account" onClick={goToSignup}>Sign up</NavLink> </button>
 
       </div>
