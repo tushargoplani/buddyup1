@@ -153,3 +153,50 @@
     .lowercase{
       text-transform: lowercase;
     }
+
+
+
+
+
+    #forgotcredentials{
+      width: 80%;
+      height: 500px;
+      margin-top: 80px;
+      position: relative;
+      display: none;
+    }
+    #forgotcredentials h2{
+      text-align: center;
+    }
+    #forgotcredentials form{
+      text-align: center;
+      margin-top: 50px;
+      height: 60%;
+    }
+    #forgotcredentials form input{
+      width: 80%;
+      height: 25%;
+      font-size: 20px;
+      background-color: lightgrey;
+      border: none;
+      outline: none;
+      border-radius: 30px;
+      padding-left: 8%;
+    }
+    #forgotcredentials form button{
+      width: 80%;
+      height: 25%;
+      font-size: 20px;
+      background-color: black;
+      color: white;
+      border: none;
+      outline: none;
+      border-radius: 30px;
+    }
+    #forgotcredentials i{
+      position: absolute;
+      font-size: 30px;
+      margin-top: 2.8%;
+      margin-left: 2%;
+    }
+

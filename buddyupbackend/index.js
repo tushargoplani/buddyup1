@@ -51,8 +51,8 @@ app.post('/create-account', bodyParser.json() ,(req,res)=>{
     userCollection.insert(req.body ,(err,result)=>
     {
         if(!err){
-            res.send({status:"OK" , data:"Account Created successfully 💖"})
-            sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.uemail, "Welcome to buddyup", `Registration successfully   ` )
+            res.send({status:"OK" , data:"Account Created successfully. You can login now. You are redirected to login page."})
+            sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.uemail, "Welcome to BuddyUp", `<b> Registration successfully </b>   ` )
 
         }
         else{
@@ -61,21 +61,10 @@ app.post('/create-account', bodyParser.json() ,(req,res)=>{
     })
 });
 
-// app.post('/login', bodyParser.json() ,(req,res)=>{ 
 
-//     const userCollection = connection.db('buddyup').collection('users');
 
-//     userCollection.find(req.body).toArray((err,docs)=>{
-//         if(!err && docs.length>0)
-//         {
 
-//             res.send({status:"ok", data:docs});
-//         }
-//         else{
-//             res.send({status:"failed", data:"some error occured"});
-//         }
-//     })
-// });
+
 
 
 

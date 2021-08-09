@@ -1,10 +1,10 @@
 import React,{useState,useEffect} from 'react';
 import './css/login.css';
 import axios from 'axios';
-import {BrowserRouter as Router,Switch,Route,NavLink} from 'react-router-dom';
-import Nav from './nav';
+import {Switch,Route,NavLink} from 'react-router-dom';
 import Signup from './signup';
 import Chatpage from './chatpage'
+
 
 
 function Login(props) {
@@ -13,7 +13,6 @@ function Login(props) {
     useEffect(()=>{
      axios.get('http://localhost:3000/list-account').then((res)=>{
          console.log(res.data.data)
-
          setUsers(res.data.data)
 
      })   
@@ -29,7 +28,6 @@ function Login(props) {
         console.log(check);
         if(check==true){
             alert("you have successfully login")
-
             
             props.history.push("/buddyup-chat");
             
@@ -41,18 +39,30 @@ function Login(props) {
 
   function goToSignup(){
       var Login = document.getElementById('mainlogin');
-      // var Signup = document.getElementById('mainsignup');
       Login.style.display = "none";
-      // Signup.style.display = "block";
   }
 
-  // function funSignIn(){
-  //   var Login = document.getElementById('mainlogin');
-  //   Login.style.display = "none";
-  // }
+  
+
+  function goToForgot(){
+    let Login = document.getElementById('login');
+    Login.style.display = "none";
+    let forgot = document.getElementById('forgotcredentials');
+    forgot.style.display = "block";
+  }
+
+  function forgottologin(){
+    let Login = document.getElementById('login');
+    Login.style.display = "block";
+    let forgot = document.getElementById('forgotcredentials');
+    forgot.style.display = "none";
+  }
+
+
+
+
 
     return (
-    // <Router>
     <React.Fragment>
 
      <div id="mainlogin">
@@ -65,11 +75,26 @@ function Login(props) {
           <input id="username" type="text" placeholder="Enter your username" class="lowercase"/><br/> <br/> <br/>
           <i class="fa fa-key"></i>
           <input id="password" type="password" placeholder="Enter your password"/> <br/><br/> 
-          <a href="">Forgot Password ?</a><br/><br/>
+          {/* <a href="">Forgot Password ?</a><br/><br/> */}
+          <a class="text-primary" href="#" onClick={goToForgot}> Forgot Password ?</a><br/><br/>
           <button onClick={Auth}>Sign in  </button>
         </form>  
         <div id="createact">Don't have account? <NavLink exact to="/create-account" onClick={goToSignup} class="text-primary">Create Account</NavLink></div>
       </div>
+
+
+      <div id="forgotcredentials">
+        <h2>Forgot Credentials</h2>
+        <form action="">
+          <i class="fa fa-envelope"></i>
+          <input id="email" type="email" placeholder="Enter your email"/> <br/><br/>
+          <a class="text-primary" href="" onClick={forgottologin}> Back to Signin </a><br/><br/>
+          <button > Go </button>
+        </form>
+      </div>
+
+
+
     </div>
     
     <div class="right">
@@ -90,7 +115,6 @@ function Login(props) {
 </div>
 
 </React.Fragment>
-// </Router>
     )
 }
 
