@@ -6,8 +6,12 @@ import './css/nav.css';
 import Login from './login';
 import Signup from './signup';
 import Chatpage from './chatpage';
+import { useSelector} from 'react-redux';
 
 function Nav() {
+
+    const user = useSelector(state => state.user);
+
     return (
         <Router>
         <div>
@@ -17,16 +21,13 @@ function Nav() {
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            {/* <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <li class="nav-link"><NavLink activeClassName="Active" class="text-muted" exact to="/">Sign in</NavLink></li>
-                </li>
-                <li class="nav-item">
-                    <li class="nav-link"><NavLink activeClassName="Active" class="text-muted" to="/create-account">Sign up</NavLink></li>
-                </li>
+                {user && <li class="nav-item">
+                    <li class="nav-link"><NavLink activeClassName="Active" class="text-muted" exact to="/">Logout</NavLink></li>
+                </li>}
                 </ul>
-            </div>   */}
+            </div>  
             </nav>
 
             <div>
