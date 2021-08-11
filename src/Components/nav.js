@@ -6,11 +6,16 @@ import './css/nav.css';
 import Login from './login';
 import Signup from './signup';
 import Chatpage from './chatpage';
-import { useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
-function Nav() {
+function Nav(props) {
 
     const user = useSelector(state => state.user);
+    const dispatch = useDispatch();
+    function logout(){
+            dispatch({type:"LOGOUT_USER"});
+            // props.history.push("/");
+    }
 
     return (
         <Router>
@@ -24,7 +29,7 @@ function Nav() {
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav ml-auto">
                 {user && <li class="nav-item">
-                    <li class="nav-link"><NavLink activeClassName="Active" class="text-muted" exact to="/">Logout</NavLink></li>
+                    <li class="nav-link"><NavLink activeClassName="Active" class="text-muted" onClick={logout} exact to="/">Logout</NavLink></li>
                 </li>}
                 </ul>
             </div>  

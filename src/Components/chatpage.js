@@ -1,7 +1,17 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useSelector } from 'react-redux';
 
 
-function Chatpage() {
+function Chatpage(props) {
+
+  const user = useSelector(state => state.user);
+  useEffect(() => {
+    if(!user){
+        props.history.push("/");
+    } 
+  }, )
+
+
     return (
         <div>
         <main>

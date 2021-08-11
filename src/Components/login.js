@@ -5,7 +5,7 @@ import {Switch,Route,NavLink} from 'react-router-dom';
 import Signup from './signup';
 import Chatpage from './chatpage'
 import { checkLogin } from '../actions/userAction';
-import { useDispatch} from 'react-redux';
+import { useDispatch, useSelector} from 'react-redux';
 
 
 
@@ -14,6 +14,16 @@ function Login(props) {
   const [users, setUser] = useState([]);
   const [password, setpassword] = useState("");
   const [username, setusername] = useState("");
+
+  const reduxUser = useSelector(state => state.user);
+
+  useEffect(() => {
+    if(reduxUser){
+      props.history.push("/buddyup-chat");
+    }
+    
+  }, [reduxUser]);
+
 
   useEffect(()=>{
    axios.get('http://localhost:3000/list-account').then((res)=>{
@@ -74,7 +84,7 @@ function forgottologin(){
         <i class="fa fa-key"></i>
         <input name="password" value={password} onChange={(e)=>{setValue(e);}} type="password" placeholder="Enter your password"/> <br/><br/>
         <span class="text-primary" onClick={goToForgot} style={{cursor:'pointer'}}> Forgot Password ?</span><br/><br/>
-           <button onClick={Auth}>Sign in  </button>
+           <button type="button" onClick={Auth}>Sign in  </button>
          </form>  
          <div id="createact">Don't have account? <NavLink exact to="/create-account" onClick={goToSignup} class="text-primary">Create Account</NavLink></div>
        </div>

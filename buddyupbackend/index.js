@@ -62,6 +62,7 @@ app.post('/create-account', bodyParser.json() ,(req,res)=>{
 });
 
 app.post('/check-login', bodyParser.json() ,(req, res) => {
+    console.log(req.body);
     var usercollection = connection.db('buddyup').collection('users');
     usercollection.find({uusername:req.body.username, upassword:req.body.password}).toArray((err, result) => {
         if (!err && result.length>0) {
