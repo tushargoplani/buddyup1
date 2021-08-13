@@ -1,5 +1,4 @@
 import React from 'react';
-// import { Router } from 'react-router-dom';
 import '../App.css';
 import {BrowserRouter as Router,Switch,Route,NavLink} from 'react-router-dom';
 import './css/nav.css';
@@ -29,7 +28,7 @@ function Nav(props) {
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav ml-auto">
                 {user && <li class="nav-item">
-                    <li class="nav-link"><NavLink activeClassName="Active" class="text-muted" onClick={logout} exact to="/">Logout</NavLink></li>
+                    <li class="nav-link"><NavLink class="text-white" onClick={logout} exact to="/">Logout</NavLink></li>
                 </li>}
                 </ul>
             </div>  
@@ -43,7 +42,6 @@ function Nav(props) {
                 </Switch>
                 </div>
 
-             {/* <Login></Login> */}
         </div>
         </Router>
     )

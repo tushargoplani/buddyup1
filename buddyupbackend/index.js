@@ -71,9 +71,20 @@ app.post('/check-login', bodyParser.json() ,(req, res) => {
             res.send({ status: 'error', data: err })
         }
     })
-
 })
 
+app.post('/update-details',bodyParser.json() , (req,res)=>{
+    var userCollection = connection.db('buddyup').collection('users');
+    userCollection.update({_id:ObjectId(req.body._id)}, {$set:{uname:req.body.name, uemail:req.body.email , uusername:req.body.username, upassword:req.body.password}} , (err,result)=>
+    {
+        if(!err){
+            res.send({status:"OK" , data:"User Updated successfully"})
+        }
+        else{
+            res.send({status:"Failed" , data:err})
+        }
+    })
+});
 
 
 
