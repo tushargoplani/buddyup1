@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useSelector } from 'react-redux';
+
 
 
 function Chatpage(props) {
@@ -11,12 +13,68 @@ function Chatpage(props) {
     } 
   }, )
 
-
   const userId = useSelector(state => state.user._id);
   const userName = useSelector(state => state.user.uname);
   const userUserName = useSelector(state => state.user.uusername);
   const userPassword = useSelector(state => state.user.upassword);
   const userEmail = useSelector(state => state.user.uemail);
+  const userImage = useSelector(state => state.user.profile);
+
+
+    const [uname, setuname] = useState(userName);
+    const [uemail, setuemail] = useState(userEmail);
+    const [upassword, setupassword] = useState(userPassword);
+    const [uusername, setuusername] = useState(userUserName);
+    var profile;
+
+    const [uploadPercentage, setuploadPercentage] = useState("")
+
+    function setValue(e) {
+      e.target.name==="Uname" && setuname(e.target.value);
+      e.target.name==="Uemail" && setuemail(e.target.value);
+      e.target.name==="Upassword" && setupassword(e.target.value);
+      e.target.name==="Uusername" && setuusername(e.target.value);
+  }
+
+  function setProfile(e)
+    {
+        profile= e.target.files[0];
+        console.log(profile);
+    }
+
+
+
+    function updateDetails(){
+
+      var formData = new FormData();
+      formData.append("_id", userId );
+      formData.append("uname", uname)
+      formData.append("uemail",uemail)
+      formData.append("uusername",uusername)
+      formData.append("upassword", upassword);
+      formData.append("profile", profile);
+      console.log(profile);
+      axios.post('http://localhost:3000/update-user',formData, {
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          },
+          onUploadProgress: function( progressEvent ) {
+              console.log("file Uploading Progresss.......");
+              console.log(progressEvent);
+            setuploadPercentage( parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 )));
+          //   setfileInProgress(progressEvent.fileName)
+          }
+        }).then((res)=>{
+            alert(res);
+        }).catch(res=>{
+          alert("sorry you are not authorised to do this action");
+      });
+
+
+
+    }
+
+
 
 
 
@@ -28,7 +86,8 @@ function Chatpage(props) {
           <div className="container">
             <div className="inside">
               <div className="nav nav-tab menu">
-                <button className="btn"><img className="avatar-xl" src="dist/img/avatars/avatar-male-1.jpg" alt="avatar" /></button>
+                {/* <button className="btn"><img className="avatar-xl" src="dist/img/avatars/default.png" alt="avatar" /></button> */}
+                <button className="btn"><img className="avatar-xl" src={ userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" /></button>
                 <a href="#members" data-toggle="tab"><i className="material-icons">account_circle</i></a>
                 <a href="#discussions" data-toggle="tab" className="active"><i className="material-icons active">chat_bubble_outline</i></a>
                 <a href="#notifications" data-toggle="tab" className="f-grow1"><i className="material-icons">notifications_none</i></a>
@@ -414,7 +473,8 @@ function Chatpage(props) {
                 <div className="tab-pane fade" id="settings">			
                   <div className="settings">
                     <div className="profile">
-                      <img className="avatar-xl" src="dist/img/avatars/avatar-male-1.jpg" alt="avatar" />
+                      {/* <img className="avatar-xl"  src="dist/img/avatars/default.png" alt="avatar" /> */}
+                      <img className="avatar-xl"  src={ userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" />
                       <h1><a href="#">{userName}</a></h1>
                       <span>{userUserName}</span>
                     </div>
@@ -432,41 +492,43 @@ function Chatpage(props) {
                         </a>
                         <div className="collapse" id="collapseOne" aria-labelledby="headingOne" data-parent="#accordionSettings">
                           <div className="content">
+                          <form>
                             <div className="upload">
                               <div className="data">
-                                <img className="avatar-xl" src="dist/img/avatars/avatar-male-1.jpg" alt="image" />
+                                {/* <img className="avatar-xl" src="dist/img/avatars/default.png" alt="image" /> */}
+                                <img className="avatar-xl"  src={ userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="image" />
                                 <label>
-                                  <input type="file" />
-                                  <span className="btn button">Upload avatar</span>
+                                  <input type="file" onChange={(e)=>{setProfile(e)}} /> 
+                                  <span className="btn button">Upload avatar</span>  {uploadPercentage} %uploaded
                                 </label>
                               </div>
                               <p>For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
                             </div>
-                            <form>
+                            {/* <form> */}
                               <div className="parent">
                                 <div className="field">
                                   <label htmlFor="Name">Name <span>*</span></label>
-                                  <input type="text" className="form-control" id="Name" placeholder="Name" defaultValue={userName} required />
+                                  <input type="text" name="Uname" value={uname} onChange={(e)=>{setValue(e)}} className="form-control" id="Name" placeholder="Name"  required />
                                 </div>
                                 <div className="field">
                                   <label htmlFor="username">username<span>*</span></label>
-                                  <input type="text" className="form-control" id="username" placeholder="username" defaultValue={userUserName} required />
+                                  <input type="text" name="Uusername" value={uusername} onChange={(e)=>{setValue(e)}} className="form-control" id="username" placeholder="username"  required />
                                 </div>
                               </div>
                               <div className="field">
                                 <label htmlFor="email">Email <span>*</span></label>
-                                <input type="email" className="form-control" id="email" placeholder="Enter your email address" defaultValue={userEmail} required />
+                                <input type="email" name="Uemail" value={uemail} onChange={(e)=>{setValue(e)}} className="form-control" id="email" placeholder="Enter your email address" required />
                               </div>
                               <div className="field">
                                 <label htmlFor="password">New Password</label>
-                                <input type="password" className="form-control" id="password" placeholder="Enter a new password" defaultValue="" required />
+                                <input type="password" name="Upassword" value={upassword} onChange={(e)=>{setValue(e)}} className="form-control" id="password" placeholder="Enter a new password"  required />
                               </div>
                               {/* <div className="field">
                                 <label htmlFor="location">Location</label>
                                 <input type="text" className="form-control" id="location" placeholder="Enter your location" defaultValue="Helena, Montana" required />
                               </div>
                               <button className="btn btn-link w-100">Delete Account</button> */}
-                              <button type="submit" className="btn button w-100">Apply Changes</button>
+                              <button type="button" className="btn button w-100" onClick={updateDetails} >Apply Changes</button>
                             </form>
                           </div>
                         </div>

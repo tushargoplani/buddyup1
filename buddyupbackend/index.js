@@ -4,6 +4,10 @@ var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 var nodemailer = require('nodemailer');
+var upload = require('./multerConfig');
+var path = require('path');
+
+var connectedUsers=[];
 
 
 var app = express();
@@ -37,8 +41,18 @@ client.connect((err,db) => {
 	// require('./sockets/chat/disconnect')(io, socket);
 	// require('./sockets/chat/privateMessage')(io, socket);
 	// require('./sockets/chat/joinPrivateRoom')(io, socket);
+
+    var random = Math.random();
+    console.log(random);
+    connectedUsers.push({random, socket});
+    socket.emit("random",random);
+    
+
+
+
 });
 
+app.use(express.static(path.join(__dirname,"userImages")));
 
 
 // APIs
@@ -83,19 +97,47 @@ app.post('/check-login', bodyParser.json() ,(req, res) => {
     })
 })
 
-app.post('/update-details',bodyParser.json() , (req,res)=>{
-    var userCollection = connection.db('buddyup').collection('users');
-    userCollection.update({_id:ObjectId(req.body._id)}, {$set:{uname:req.body.name, uemail:req.body.email , uusername:req.body.username, upassword:req.body.password}} , (err,result)=>
-    {
-        if(!err){
-            res.send({status:"OK" , data:"User Updated successfully"})
+// app.post('/update-details',bodyParser.json() , (req,res)=>{
+//     var userCollection = connection.db('buddyup').collection('users');
+//     userCollection.update({_id:ObjectId(req.body._id)}, {$set:{uname:req.body.name, uemail:req.body.email , uusername:req.body.username, upassword:req.body.password}} , (err,result)=>
+//     {
+//         if(!err){
+//             res.send({status:"OK" , data:"User Updated successfully"})
+//         }
+//         else{
+//             res.send({status:"Failed" , data:err})
+//         }
+//     })
+// });
+
+
+app.post('/update-user', (req,res)=>{
+    console.log("103--------------");
+    upload(req,res,(err)=>{
+        if (err) {
+            console.log("Error Occured during upload ");
+            console.log(err);
+            res.send({status:"failed", data:err});
         }
         else{
-            res.send({status:"Failed" , data:err})
-        }
-    })
-});
+            console.log("111---------------")
+            var userCollection = connection.db('buddyup').collection('users');
+            console.log("files",req.files);
+            console.log("line 47"); 
+            console.log(req.body);
 
+            userCollection.update({_id:ObjectId(req.body._id)},{$set:{profile:req.files.profile[0].filename, uname:req.body.uname, uemail:req.body.uemail, uusername:req.body.uusername, upassword:req.body.upassword}},(err,result)=>{
+                if(!err)
+                {
+                    res.send({status:"success", data:"user details updated sucessfully"});
+                }
+                else{
+                    res.send({status:"failed", data:err});
+                }
+            })
+        }
+    });
+})
 
 
 
