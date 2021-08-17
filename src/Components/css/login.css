@@ -201,7 +201,7 @@
     }
 
 
-    /* ::selection{
-      color: black;
-      background-color: lightgray;
-    } */
+    ::selection{
+      color: white;
+      background-color: navy;
+    }

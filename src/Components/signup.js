@@ -31,11 +31,30 @@ function Signup(props) {
   }
 
 
+//   function EmailAndUsername() {  // existing email and existing username not be repeated
+//     var em = {uemail}
+//     axios.post('http://localhost:3000/valid-email', em).then((res) => {
+//         var a = res.data.status
+//         // console.log(a)
+//         if (a === 'ok') {
+//             var s = {uname,uemail,uusername,upassword};
+//             console.log(s);
+//             axios.post('http://localhost:3000/create-account',s).then((res)=>{
+//             alert(res.data.data);
+//             props.history.push("/");
+//         }) 
+//         } 
+//         else {
+//             alert(res.data.data);
+//         }
+//     })
+// }
+
+
   function validate(){
     var isvalid=true;
 
-    // validate for Name
-    // var name = document.getElementsByName('Uname').value;       
+    // validate for Name 
     if(uname=="" || uname==null)
     {
         isvalid=false;
@@ -44,15 +63,12 @@ function Signup(props) {
 
     //validate for email
     var emailregex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    // var email = document.getElementsByName('Uemail').value;
-    // console.log(emailregex.test(email));
     if(!emailregex.test(uemail)){
       alert("Email is not valid");
       isvalid=false;
     }
     
-    //validate for username
-    // var username = document.getElementsByName('Uusername').value;       
+    //validate for username   
     if(uusername=="" || uusername==null)
     {
         isvalid=false;
@@ -68,8 +84,6 @@ function Signup(props) {
 
     //validate for password
     var passregex = /(?=(.*[0-9]))(?=.*[\!@#$%^&*()\\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}/ ;
-    // var password = document.getElementsByName('Upassword').value;
-    // console.log(passregex.test(password));
     if(!passregex.test(upassword)){
         alert("Password should have 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character and be at least 8 characters long");
         isvalid=false;
@@ -79,14 +93,38 @@ function Signup(props) {
 
 
     if(isvalid==true){
-      var s = {uname,uemail,uusername,upassword};
-      // console.log(s);
 
-      axios.post('http://localhost:3000/create-account',s).then((res)=>{
+
+      var em = {uemail};
+      // var us = {uusername};
+      axios.post('http://localhost:3000/valid-email', em).then((res) => {
+        var a = res.data.status
+        // console.log(a)
+        if (a === 'ok') {
+              var s = {uname,uemail,uusername,upassword};
+              console.log(s);
+              axios.post('http://localhost:3000/create-account',s).then((res)=>{
+              alert(res.data.data);
+              props.history.push("/");
+          }) 
+        } 
+        else {
             alert(res.data.data);
-            props.history.push("/");
-        }) 
+        }
+    })
+
+
+
+      // var s = {uname,uemail,uusername,upassword};
+      // // console.log(s);
+
+      // axios.post('http://localhost:3000/create-account',s).then((res)=>{
+      //       alert(res.data.data);
+      //       props.history.push("/");
+      //   }) 
+
     }
+
 }
 
 

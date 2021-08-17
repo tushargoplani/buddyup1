@@ -15,6 +15,7 @@ function Login(props) {
   const [users, setUser] = useState([]);
   const [password, setpassword] = useState("");
   const [username, setusername] = useState("");
+  const [email, setemail] = useState("");
 
   const reduxUser = useSelector(state => state.user);
 
@@ -39,7 +40,17 @@ function Login(props) {
   function setValue(e) {
     e.target.name=="username" && setusername(e.target.value);
     e.target.name=="password" && setpassword(e.target.value);
+    e.target.name=="email" && setemail(e.target.value);
   }
+
+  function Sendpassword(){
+    alert(email)  
+   var  s={email} 
+    axios.post('http://localhost:3000/user-by-email',s).then((res)=>{
+        console.log(res.data.data)
+       alert("completed") 
+})
+}
   
   function Auth(){
       alert(username);
@@ -96,9 +107,9 @@ function forgottologin(){
          <h2>Forgot Credentials</h2>
          <form action="">
            <i class="fa fa-envelope"></i>
-           <input id="email" type="email" placeholder="Enter your email"/> <br/><br/>
+           <input name="email" value={email} onChange={(e)=>{setValue(e);}} type="email" placeholder="Enter your email"/> <br/><br/>
            <a class="text-primary" href="" onClick={forgottologin}> Back to Signin </a><br/><br/>
-           <button > Go </button>
+           <button onClick={Sendpassword} type="button" > Send me </button>
          </form>
        </div>
 

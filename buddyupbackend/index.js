@@ -85,6 +85,24 @@ app.post('/create-account', bodyParser.json() ,(req,res)=>{
     })
 });
 
+app.post('/valid-email', bodyParser.json() ,(req, res) => {
+    var userCollection = connection.db('buddyup').collection('users');
+    userCollection.find({uemail:req.body.uemail}).toArray((err, result) => {
+        if (!err && result.length>0) {
+            res.send({ status: 'error', data: "this email is already registered email" });
+        } else {
+            res.send({ status: 'ok' })
+        }
+        // userCollection.find({uusername:req.body.uusername}).toArray((err, result) => {
+        //     if (!err && result.length>0) {
+        //         res.send({ status: 'error', data: "this username is already registered email" });
+        //     } else {
+        //         res.send({ status: 'ok' })
+        //     }
+        // })
+    })
+})
+
 app.post('/check-login', bodyParser.json() ,(req, res) => {
     console.log(req.body);
     var usercollection = connection.db('buddyup').collection('users');
@@ -97,18 +115,28 @@ app.post('/check-login', bodyParser.json() ,(req, res) => {
     })
 })
 
-// app.post('/update-details',bodyParser.json() , (req,res)=>{
-//     var userCollection = connection.db('buddyup').collection('users');
-//     userCollection.update({_id:ObjectId(req.body._id)}, {$set:{uname:req.body.name, uemail:req.body.email , uusername:req.body.username, upassword:req.body.password}} , (err,result)=>
-//     {
-//         if(!err){
-//             res.send({status:"OK" , data:"User Updated successfully"})
-//         }
-//         else{
-//             res.send({status:"Failed" , data:err})
-//         }
-//     })
-// });
+app.post('/user-by-email',bodyParser.json(),(req,res)=>{
+    console.log("email check");
+    console.log(req.body.email)
+    var UserCollection=connection.db('buddyup').collection('users');
+    console.log("var email check three"+ req.body.email)
+    UserCollection.find({uemail:(req.body.email)}).toArray((err,result)=>{
+        console.log("updated student two")
+        if(!err && result.length>0){
+            console.log(result);
+            res.send({status:"ok" ,data:result})
+            console.log("email is match")
+            var n=result.map((e)=>{return e.uusername})
+            var i=result.map ((e)=>{return e.upassword})
+            sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.email, "Welcome to BuddyUp", "<h3> your buddyup account  password is</h3>" +i +"<h3> your buddyup account  username is </h3>" +n  ) 
+            
+        }
+        else{
+            res.send({status:"failed",data:err})
+        }
+    })
+})
+
 
 
 app.post('/update-user', (req,res)=>{
