@@ -9,6 +9,7 @@ import { useDispatch, useSelector} from 'react-redux';
 
 
 
+
 function Login(props) {
 
   const [users, setUser] = useState([]);
@@ -20,6 +21,7 @@ function Login(props) {
   useEffect(() => {
     if(reduxUser){
       props.history.push("/buddyup-chat");
+
     }
     
   }, [reduxUser]);

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import socket from '../utils/socket';
 
 export function checkLogin(u){
     return (dispatch)=>{
@@ -10,7 +11,7 @@ export function checkLogin(u){
             alert(JSON.stringify(res.data));
             if(res.data.status=="ok")
             {
-                dispatch({type:"LOGIN_USER", payload:res.data.data})
+                dispatch({type:"LOGIN_USER", payload:{...(res.data.data),socket:socket}});
             }
             else{
                 alert("credential are not correct");

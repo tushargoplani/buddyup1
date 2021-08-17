@@ -6,12 +6,12 @@ var ObjectId = require('mongodb').ObjectId;
 var nodemailer = require('nodemailer');
 
 
-
-
-
-
 var app = express();
 app.use(cors());
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
 
 var client = new MongoClient("mongodb+srv://buddyupuser:buddyupuser@school.ivhuh.mongodb.net/buddyup?retryWrites=true&w=majority", {useNewURLParser:true , useUnifiedTopology: true});
 var connection;
@@ -27,7 +27,17 @@ client.connect((err,db) => {
 })
 
 
-
+/**
+ * SOCKET
+ */
+ io.on('connection', async (socket) => {
+     console.log("some client connected");
+	// require('./sockets/chat/joinedUser')(io, socket);
+	// require('./sockets/chat/chatMessage')(io, socket);
+	// require('./sockets/chat/disconnect')(io, socket);
+	// require('./sockets/chat/privateMessage')(io, socket);
+	// require('./sockets/chat/joinPrivateRoom')(io, socket);
+});
 
 
 
@@ -138,7 +148,9 @@ function sendMail(from, appPassword, to, subject,  htmlmsg)
 
 
 
-
-app.listen(3000,()=> {
+server.listen(3000,()=> {
     console.log("Server is started on port 3000");
-})
+});
+// app.listen(3000,()=> {
+//     console.log("Server is started on port 3000");
+// })
