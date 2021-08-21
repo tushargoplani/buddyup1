@@ -25,6 +25,7 @@ function Chatpage(props) {
     const [uemail, setuemail] = useState(userEmail);
     const [upassword, setupassword] = useState(userPassword);
     const [uusername, setuusername] = useState(userUserName);
+    const [addByUsername,setaddByUsername] = useState("");
     var profile;
 
     const [uploadPercentage, setuploadPercentage] = useState("")
@@ -34,6 +35,7 @@ function Chatpage(props) {
       e.target.name==="Uemail" && setuemail(e.target.value);
       e.target.name==="Upassword" && setupassword(e.target.value);
       e.target.name==="Uusername" && setuusername(e.target.value);
+      e.target.name==="addByUsername" && setaddByUsername(e.target.value);
   }
 
   function setProfile(e)
@@ -70,17 +72,41 @@ function Chatpage(props) {
           alert("sorry you are not authorised to do this action");
       });
 
-
-
     }
 
+
+
+    function addFriend(){
+      // var addfrnd = new FormData();
+      // // addfrnd.append("_id", userId );
+      var friend = addByUsername; 
+      // addfrnd.append("friend",friend);
+      // console.log(friend);
+      // addfrnd.append("userUserName",userUserName);
+      // console.log(userUserName);
+      // console.log(addfrnd +"friend alert");
+    //   axios.post('http://localhost:3000/add-friend',addfrnd).then((res)=>{
+    //     alert(res.data.data);
+    // })
+    var addfrnd = {friend,userUserName}
+      axios.post('http://localhost:3000/add-friend',addfrnd, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+       })
+       .then((res)=>{
+        alert(res);
+    }).catch(res=>{
+      alert("No user found by this username");
+  });
+     }
 
 
 
 
     return (
         <main>
-        <div className="layout">
+        <div className="layout" >
         {/* Start of Navigation */}
         <div className="navigation">
           <div className="container">
@@ -93,7 +119,7 @@ function Chatpage(props) {
                 <a href="#notifications" data-toggle="tab" className="f-grow1"><i className="material-icons">notifications_none</i></a>
                 {/* <button class="btn mode"><i class="material-icons">brightness_2</i></button> */}
                 <a href="#settings" data-toggle="tab"><i className="material-icons">settings</i></a>
-                <button className="btn power" onclick="visitPage();"><i className="material-icons">power_settings_new</i></button>
+                {/* <button className="btn power" onclick="visitPage();"><i className="material-icons">power_settings_new</i></button> */}
               </div>
             </div>
           </div>
@@ -593,18 +619,18 @@ function Chatpage(props) {
                 <form>
                   <div className="form-group">
                     <label htmlFor="user">Username:</label>
-                    <input type="text" className="form-control" id="user" placeholder="Add recipient..." required />
-                    <div className="user" id="contact">
+                    <input name="addByUsername" value={addByUsername} onChange={(e)=>{setValue(e);}}  type="text" className="form-control" id="user" placeholder="Add recipient..." required />
+                    {/* <div className="user" id="contact">
                       <img className="avatar-sm" src="dist/img/avatars/avatar-female-5.jpg" alt="avatar" />
                       <h5>Keith Morris</h5>
                       <button className="btn"><i className="material-icons">close</i></button>
-                    </div>
+                    </div> */}
                   </div>
-                  <div className="form-group">
+                  {/* <div className="form-group">
                     <label htmlFor="welcome">Message:</label>
                     <textarea className="text-control" id="welcome" placeholder="Send your welcome message..." defaultValue={"Hi Keith, I'd like to add you as a contact."} />
-                  </div>
-                  <button type="submit" className="btn button w-100">Send Friend Request</button>
+                  </div> */}
+                  <button type="button" onClick={addFriend} className="btn button w-100">Send Friend Request</button>
                 </form>
               </div>
             </div>

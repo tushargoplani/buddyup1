@@ -13,8 +13,8 @@ socket.on('connect', (e) => {
 
     // define your event handlers
     socket.on('random', (m)=>{
-        alert("git a msg");
-        alert(m);
+        // alert("git a msg");
+        // alert(m);
     })
 
 

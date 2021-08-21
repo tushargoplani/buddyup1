@@ -28,7 +28,7 @@ function Nav(props) {
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav ml-auto">
                 {user && <li class="nav-item">
-                    <li class="nav-link"><NavLink class="text-white font-weight-bold" onClick={logout} exact to="/">Logout</NavLink></li>
+                    <li class="nav-link text-white font-weight-bold"><NavLink class="text-white font-weight-bold" onClick={logout} exact to="/">Logout</NavLink></li>
                 </li>}
                 </ul>
             </div>  

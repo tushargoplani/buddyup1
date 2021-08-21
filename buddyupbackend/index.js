@@ -138,7 +138,6 @@ app.post('/user-by-email',bodyParser.json(),(req,res)=>{
 })
 
 
-
 app.post('/update-user', (req,res)=>{
     console.log("103--------------");
     upload(req,res,(err)=>{
@@ -166,6 +165,98 @@ app.post('/update-user', (req,res)=>{
         }
     });
 })
+
+
+app.post('/add-friend', bodyParser.json() ,(req,res)=>{ 
+
+    const collection = connection.db('buddyup').collection('users');
+    var friend=req.body.friend;
+    console.log(friend);
+    var addByUsername=req.body.userUserName;
+    console.log(addByUsername);
+    console.log(req.body);
+    collection.updateOne({'uusername':addByUsername},{$push:{friends:{name:friend,status:false,sent:true,recieved:false}}})
+    collection.updateOne({'uusername':friend},{$push:{friends:{name:addByUsername,status:false,sent:false,recieved:true}}}
+            ,(err,result)=>{
+            if(!err)
+            {
+                res.send({status:"ok"});
+            }
+            else{
+                res.send({status:"failed", data:"some error occured"});
+            }
+        })
+    
+        });
+
+// app.post('/add-friend', bodyParser.json() ,(req,res)=>{ 
+
+//     const collection = connection.db('buddyup').collection('users');
+//     // var friend=req.body.friend;
+//     // console.log(friend);
+//     // var addByUsername=req.body.userUserName;
+//     // console.log(addByUsername);
+//     console.log(req.body);
+//     collection.updateOne({'uusername':req.body.userUserName},{$push:{friends:{name:req.body.friend,status:false,sent:true,recieved:false}}})
+//     collection.updateOne({'uusername':req.body.friend},{$push:{friends:{name:req.body.userUserName,status:false,sent:false,recieved:true}}}
+//             ,(err,result)=>{
+//             if(!err)
+//             {
+//                 res.send({status:"ok"});
+//             }
+//             else{
+//                 res.send({status:"failed", data:"some error occured"});
+//             }
+//         })
+    
+//         });
+
+
+
+
+
+app.post('/get-notif', bodyParser.json() ,(req,res)=>{ 
+
+
+
+    const collection = connection.db('buddyup').collection('users');
+
+
+    collection.find(req.body).toArray((err,docs)=>{
+        if(!err)
+        {
+            res.send({status:"ok", data:docs});
+        }
+        else{
+            res.send({status:"failed", data:"some error occured"});
+        }
+    })
+
+    });
+
+app.post('/accept-request', bodyParser.json() ,(req,res)=>{ 
+
+
+
+        const collection = connection.db('buddyup').collection('users');
+        var friend=req.body.friendEmail;
+        var username=req.body.uusername;
+      
+        collection.update({"uusername":uusername,"friends":{$elemMatch:{"name":friend}}}, {$set:{"friends.$.status":true}})
+        collection.update({"uusername":friend,"friends":{$elemMatch:{"name":uusername}}}, {$set:{"friends.$.status":true}}
+                ,(err,result)=>{
+                if(!err)
+                {
+                    res.send({status:"ok"});
+                }
+                else{
+                    res.send({status:"failed", data:"some error occured"});
+                }
+            })
+        
+});
+
+
 
 
 
