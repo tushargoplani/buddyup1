@@ -94,12 +94,10 @@ function Signup(props) {
 
     if(isvalid==true){
 
-
       var em = {uemail};
-      // var us = {uusername};
       axios.post('http://localhost:3000/valid-email', em).then((res) => {
-        var a = res.data.status
-        // console.log(a)
+        var a = res.data.status;
+
         if (a === 'ok') {
               var s = {uname,uemail,uusername,upassword};
               console.log(s);
@@ -114,14 +112,6 @@ function Signup(props) {
     })
 
 
-
-      // var s = {uname,uemail,uusername,upassword};
-      // // console.log(s);
-
-      // axios.post('http://localhost:3000/create-account',s).then((res)=>{
-      //       alert(res.data.data);
-      //       props.history.push("/");
-      //   }) 
 
     }
 

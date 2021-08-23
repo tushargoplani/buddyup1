@@ -25,7 +25,7 @@ function Chatpage(props) {
     const [uemail, setuemail] = useState(userEmail);
     const [upassword, setupassword] = useState(userPassword);
     const [uusername, setuusername] = useState(userUserName);
-    const [addByUsername,setaddByUsername] = useState("");
+    const [friend,setfriend] = useState("");
     var profile;
 
     const [uploadPercentage, setuploadPercentage] = useState("")
@@ -35,7 +35,7 @@ function Chatpage(props) {
       e.target.name==="Uemail" && setuemail(e.target.value);
       e.target.name==="Upassword" && setupassword(e.target.value);
       e.target.name==="Uusername" && setuusername(e.target.value);
-      e.target.name==="addByUsername" && setaddByUsername(e.target.value);
+      e.target.name==="friend" && setfriend(e.target.value);
   }
 
   function setProfile(e)
@@ -77,29 +77,15 @@ function Chatpage(props) {
 
 
     function addFriend(){
-      // var addfrnd = new FormData();
-      // // addfrnd.append("_id", userId );
-      var friend = addByUsername; 
-      // addfrnd.append("friend",friend);
-      // console.log(friend);
-      // addfrnd.append("userUserName",userUserName);
-      // console.log(userUserName);
-      // console.log(addfrnd +"friend alert");
-    //   axios.post('http://localhost:3000/add-friend',addfrnd).then((res)=>{
-    //     alert(res.data.data);
-    // })
-    var addfrnd = {friend,userUserName}
-      axios.post('http://localhost:3000/add-friend',addfrnd, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-       })
-       .then((res)=>{
-        alert(res);
-    }).catch(res=>{
-      alert("No user found by this username");
-  });
-     }
+      console.log(friend);
+      console.log(userUserName);
+      var addfrnd = {friend,userUserName};
+      console.log(addfrnd);
+      axios.post('http://localhost:3000/add-friend',addfrnd).then((res)=>{
+        alert(res.data.data);
+      })
+
+    }
 
 
 
@@ -619,7 +605,7 @@ function Chatpage(props) {
                 <form>
                   <div className="form-group">
                     <label htmlFor="user">Username:</label>
-                    <input name="addByUsername" value={addByUsername} onChange={(e)=>{setValue(e);}}  type="text" className="form-control" id="user" placeholder="Add recipient..." required />
+                    <input name="friend" value={friend} onChange={(e)=>{setValue(e);}}  type="text" className="form-control" id="user" placeholder="Add recipient..." required />
                     {/* <div className="user" id="contact">
                       <img className="avatar-sm" src="dist/img/avatars/avatar-female-5.jpg" alt="avatar" />
                       <h5>Keith Morris</h5>

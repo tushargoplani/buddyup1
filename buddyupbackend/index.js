@@ -89,19 +89,25 @@ app.post('/valid-email', bodyParser.json() ,(req, res) => {
     var userCollection = connection.db('buddyup').collection('users');
     userCollection.find({uemail:req.body.uemail}).toArray((err, result) => {
         if (!err && result.length>0) {
-            res.send({ status: 'error', data: "this email is already registered email" });
+            res.send({ status: 'error', data: "this email is already registered :(" });
         } else {
             res.send({ status: 'ok' })
         }
-        // userCollection.find({uusername:req.body.uusername}).toArray((err, result) => {
-        //     if (!err && result.length>0) {
-        //         res.send({ status: 'error', data: "this username is already registered email" });
-        //     } else {
-        //         res.send({ status: 'ok' })
-        //     }
-        // })
     })
 })
+
+
+app.post('/valid-username', bodyParser.json() ,(req, res) => {
+    var userCollection = connection.db('buddyup').collection('users');
+        userCollection.find({uusername:req.body.uusername}).toArray((err, result) => {
+            if (!err && result.length>0) {
+                res.send({ status: 'error', data: "this username is already registered :(" });
+            } else {
+                res.send({ status: 'ok' })
+            }
+        })
+})
+
 
 app.post('/check-login', bodyParser.json() ,(req, res) => {
     console.log(req.body);
@@ -115,6 +121,9 @@ app.post('/check-login', bodyParser.json() ,(req, res) => {
     })
 })
 
+
+
+// for forgot password
 app.post('/user-by-email',bodyParser.json(),(req,res)=>{
     console.log("email check");
     console.log(req.body.email)
@@ -172,56 +181,26 @@ app.post('/add-friend', bodyParser.json() ,(req,res)=>{
     const collection = connection.db('buddyup').collection('users');
     var friend=req.body.friend;
     console.log(friend);
-    var addByUsername=req.body.userUserName;
-    console.log(addByUsername);
+    var myUsername = req.body.userUserName;
+    console.log(myUsername);
     console.log(req.body);
-    collection.updateOne({'uusername':addByUsername},{$push:{friends:{name:friend,status:false,sent:true,recieved:false}}})
-    collection.updateOne({'uusername':friend},{$push:{friends:{name:addByUsername,status:false,sent:false,recieved:true}}}
+    collection.updateOne({'uusername':myUsername},{$push:{friends:{name:friend,status:false,sent:true,recieved:false}}})
+    collection.updateOne({'uusername':friend},{$push:{friends:{name:myUsername,status:false,sent:false,recieved:true}}}
             ,(err,result)=>{
             if(!err)
             {
-                res.send({status:"ok"});
+                res.send({status:"ok", data:"Friend Request Sent"});
             }
             else{
                 res.send({status:"failed", data:"some error occured"});
             }
         })
-    
         });
-
-// app.post('/add-friend', bodyParser.json() ,(req,res)=>{ 
-
-//     const collection = connection.db('buddyup').collection('users');
-//     // var friend=req.body.friend;
-//     // console.log(friend);
-//     // var addByUsername=req.body.userUserName;
-//     // console.log(addByUsername);
-//     console.log(req.body);
-//     collection.updateOne({'uusername':req.body.userUserName},{$push:{friends:{name:req.body.friend,status:false,sent:true,recieved:false}}})
-//     collection.updateOne({'uusername':req.body.friend},{$push:{friends:{name:req.body.userUserName,status:false,sent:false,recieved:true}}}
-//             ,(err,result)=>{
-//             if(!err)
-//             {
-//                 res.send({status:"ok"});
-//             }
-//             else{
-//                 res.send({status:"failed", data:"some error occured"});
-//             }
-//         })
-    
-//         });
-
-
-
 
 
 app.post('/get-notif', bodyParser.json() ,(req,res)=>{ 
 
-
-
     const collection = connection.db('buddyup').collection('users');
-
-
     collection.find(req.body).toArray((err,docs)=>{
         if(!err)
         {
@@ -231,13 +210,11 @@ app.post('/get-notif', bodyParser.json() ,(req,res)=>{
             res.send({status:"failed", data:"some error occured"});
         }
     })
+});
 
-    });
 
 app.post('/accept-request', bodyParser.json() ,(req,res)=>{ 
-
-
-
+    
         const collection = connection.db('buddyup').collection('users');
         var friend=req.body.friendEmail;
         var username=req.body.uusername;
