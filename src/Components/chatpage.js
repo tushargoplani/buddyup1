@@ -88,6 +88,49 @@ function Chatpage(props) {
     }
 
 
+var rrrr;
+  // function notification(){
+  //   var myUsername = {userUserName};
+  //   // console.log(myUsername);
+  //   axios.post('http://localhost:3000/get-notif',myUsername).then((res)=>{
+  //     // alert(JSON.stringify(res.data.data));
+  //     // alert(res.data.status);
+  //     if(res.data.status=="ok"){
+  //       var notifs = res.data.data[0].friends.filter(function(s){
+  //         var recieve = s.recieved==true;
+  //         // console.log(recieve);
+  //         var status = s.status==false;
+  //         // console.log(status);
+  //         return recieve && status;
+  //         }); 
+  //     // alert( JSON.stringify(notifs) );
+  //     var reqNoti = notifs.map((S)=>{return S.name;}) + " has sent you a friend request.";
+  //     alert(reqNoti);
+  //     rrrr = reqNoti;
+  //     // alert(rrrr);
+  //     // return reqNoti;
+  //     }
+  //   })
+  // }
+
+    var myUsername = {userUserName};
+    var rrr = axios.post('http://localhost:3000/get-notif',myUsername).then((res)=>{
+      if(res.data.status=="ok"){
+        var notifs = res.data.data[0].friends.filter(function(s){
+          var recieve = s.recieved==true;
+          var status = s.status==false;
+          return recieve && status;
+          }); 
+      // alert( JSON.stringify(notifs) );
+      var reqNoti = notifs.map((S)=>{return S.name;}) + " has sent you a friend request.";
+      // alert(reqNoti);
+      // return(reqNoti);
+      } return reqNoti;
+    })
+  alert(JSON.stringify(rrr));
+
+  
+
 
 
     return (
@@ -111,6 +154,7 @@ function Chatpage(props) {
           </div>
         </div>
         {/* End of Navigation */}
+        {/* <button onClick={notification}>Check notification</button> */}
         {/* Start of Sidebar */}
         <div className="sidebar" id="sidebar">
           <div className="container">
@@ -393,6 +437,7 @@ function Chatpage(props) {
                           <i className="material-icons online">fiber_manual_record</i>
                         </div>
                         <div className="data">
+                          {/* <p>{rrr}</p> */}
                           <p>Janette has accepted your friend request on Swipe.</p>
                           <span>Oct 17, 2018</span>
                         </div>

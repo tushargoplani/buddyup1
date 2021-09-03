@@ -199,9 +199,9 @@ app.post('/add-friend', bodyParser.json() ,(req,res)=>{
 
 
 app.post('/get-notif', bodyParser.json() ,(req,res)=>{ 
-
+    // console.log(req.body);
     const collection = connection.db('buddyup').collection('users');
-    collection.find(req.body).toArray((err,docs)=>{
+    collection.find({uusername:(req.body.userUserName)}).toArray((err,docs)=>{
         if(!err)
         {
             res.send({status:"ok", data:docs});
