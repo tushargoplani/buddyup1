@@ -216,15 +216,15 @@ app.post('/get-notif', bodyParser.json() ,(req,res)=>{
 app.post('/accept-request', bodyParser.json() ,(req,res)=>{ 
     
         const collection = connection.db('buddyup').collection('users');
-        var friend=req.body.friendEmail;
-        var username=req.body.uusername;
+        var friend=req.body.friendReq; 
+        var username=req.body.userUserName; 
       
-        collection.update({"uusername":uusername,"friends":{$elemMatch:{"name":friend}}}, {$set:{"friends.$.status":true}})
-        collection.update({"uusername":friend,"friends":{$elemMatch:{"name":uusername}}}, {$set:{"friends.$.status":true}}
+        collection.updateOne({"username":username,"friends":{$elemMatch:{"name":friend}}}, {$set:{"friends.$.status":true}})
+        collection.updateOne({"username":friend,"friends":{$elemMatch:{"name":username}}}, {$set:{"friends.$.status":true}}
                 ,(err,result)=>{
                 if(!err)
                 {
-                    res.send({status:"ok"});
+                    res.send({status:"ok", data:"friend request accepted"});
                 }
                 else{
                     res.send({status:"failed", data:"some error occured"});

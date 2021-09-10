@@ -84,11 +84,20 @@ function Chatpage(props) {
       axios.post('http://localhost:3000/add-friend',addfrnd).then((res)=>{
         alert(res.data.data);
       })
-
     }
 
+    function accept(friendReq){
+      console.log(friendReq);
+      var acceptFrnd = {friendReq,userUserName};
+      console.log(acceptFrnd);
+      axios.post('http://localhost:3000/accept-request',acceptFrnd).then((res)=>{
+        if(res.data.status=="ok"){
+          alert(res.data.data);
+        }
+      });
+    }
 
-var rrrr;
+  // var rrrr;
   // function notification(){
   //   var myUsername = {userUserName};
   //   // console.log(myUsername);
@@ -113,27 +122,60 @@ var rrrr;
   //   })
   // }
 
-    var myUsername = {userUserName};
-    var rrr = axios.post('http://localhost:3000/get-notif',myUsername).then((res)=>{
-      if(res.data.status=="ok"){
-        var notifs = res.data.data[0].friends.filter(function(s){
-          var recieve = s.recieved==true;
-          var status = s.status==false;
-          return recieve && status;
-          }); 
-      // alert( JSON.stringify(notifs) );
-      var reqNoti = notifs.map((S)=>{return S.name;}) + " has sent you a friend request.";
-      // alert(reqNoti);
-      // return(reqNoti);
-      } return reqNoti;
-    })
-  alert(JSON.stringify(rrr));
 
+  // var myUsername = {userUserName};
+  //   var rrr = axios.post('http://localhost:3000/get-notif',myUsername).then((res)=>{
+  //     if(res.data.status=="ok"){
+  //       var notifs = res.data.data[0].friends.filter(function(s){
+  //         var recieve = s.recieved==true;
+  //         var status = s.status==false;
+  //         return recieve && status;
+  //         }); 
+  //     // alert( JSON.stringify(notifs) );
+  //     var reqNoti = notifs.map((S)=>{return S.name;}) + " has sent you a friend request.";
+  //     console.log(reqNoti);
+  //     return reqNoti;
+  //     }
+  //   })
+  // console.log(JSON.stringify(rrr));
+                                                                                       
   
+  var myUsername = {userUserName};
+  const [notification, setnotification] = useState([]);
+    useEffect(() => {
+        axios.post('http://localhost:3000/get-notif',myUsername).then(
+
+            (res) => {
+              if(res.data.status=="ok"){
+                var notifs = res.data.data[0].friends.filter(function(s){
+                  var recieve = s.recieved==true;
+                  var status = s.status==false;
+                  return recieve && status;
+                  });
+                // console.log(notifs);
+                setnotification(notifs);
+              }
+            }
+        )
+    }, []);
+
+
+    var mainnotif = notification.map((S)=>{
+      return <a key={S.name} href="#" className="filterNotifications all latest notification" data-toggle="list">
+      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
+      <div className="status">
+        <i className="material-icons online">fiber_manual_record</i>
+      </div>
+      <div className="data">
+        <p>{S.name}, has sent you a friend request.</p>
+        <button class="btn button" onClick={()=>{accept(S.name)}} >Accept</button>
+      </div>
+      </a>
+    });
 
 
 
-    return (
+  return (
         <main>
         <div className="layout" >
         {/* Start of Navigation */}
@@ -431,13 +473,14 @@ var rrrr;
                   <div className="notifications">
                     <h1>Notifications</h1>
                     <div className="list-group" id="alerts" role="tablist">
+                      {mainnotif}
                       <a href="#" className="filterNotifications all latest notification" data-toggle="list">
                         <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
                         <div className="status">
                           <i className="material-icons online">fiber_manual_record</i>
                         </div>
                         <div className="data">
-                          {/* <p>{rrr}</p> */}
+                          {/* <p>{notif}</p> */}
                           <p>Janette has accepted your friend request on Swipe.</p>
                           <span>Oct 17, 2018</span>
                         </div>
