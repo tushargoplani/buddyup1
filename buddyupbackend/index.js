@@ -218,9 +218,9 @@ app.post('/accept-request', bodyParser.json() ,(req,res)=>{
         const collection = connection.db('buddyup').collection('users');
         var friend=req.body.friendReq; 
         var username=req.body.userUserName; 
-      
-        collection.updateOne({"username":username,"friends":{$elemMatch:{"name":friend}}}, {$set:{"friends.$.status":true}})
-        collection.updateOne({"username":friend,"friends":{$elemMatch:{"name":username}}}, {$set:{"friends.$.status":true}}
+        console.log(friend); console.log(username);
+        collection.updateOne({"uusername":username,"friends":{$elemMatch:{"name":friend}}}, {$set:{"friends.$.status":true}})
+        collection.updateOne({"uusername":friend,"friends":{$elemMatch:{"name":username}}}, {$set:{"friends.$.status":true}}
                 ,(err,result)=>{
                 if(!err)
                 {
