@@ -253,6 +253,22 @@ app.post('/friendData', bodyParser.json(), (req, res) => {
 });
 
 
+app.post('/send-message', bodyParser.json(), (req, res) => {
+
+    const collection = connection.db('buddyup').collection('users');
+    console.log(req.body);
+    // collection.updateOne({ 'uusername': myUsername }, { $push: { friends: { name: friend, status: false, sent: true, recieved: false } } })
+    collection.updateOne({ 'uusername': req.body.userUserName }, { $push: { chats: { FriendUsername: req.body.friendUsername, Message: req.body.message, MessageId: req.body.messageid, Time: req.body.time, Date:req.body.date, DateTime:req.body.dateTime }}}
+        , (err, result) => {
+            if (!err) {
+                res.send({ status: "ok", data: "Message Sent" });
+            }
+            else {
+                res.send({ status: "failed", data: "some error occured" });
+            }
+        })
+});
+
 
 
 

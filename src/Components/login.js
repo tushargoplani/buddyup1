@@ -30,7 +30,7 @@ function Login(props) {
 
   useEffect(()=>{
    axios.get('http://localhost:3000/list-account').then((res)=>{
-       console.log(res.data.data)
+      //  console.log(res.data.data)
        setUser(res.data.data)
    })   
   },[])
@@ -53,8 +53,8 @@ function Login(props) {
 }
   
   function Auth(){
-      alert(username);
-      alert(password);
+      // alert(username);
+      // alert(password);
       dispatch(checkLogin({username,password}));
   }
 

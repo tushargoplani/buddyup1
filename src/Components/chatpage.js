@@ -27,7 +27,8 @@ function Chatpage(props) {
   const [friend, setfriend] = useState("");
   var profile;
 
-  const [uploadPercentage, setuploadPercentage] = useState("")
+  const [uploadPercentage, setuploadPercentage] = useState("");
+  const [message, setmessage] = useState("");
 
   function setValue(e) {
     e.target.name === "Uname" && setuname(e.target.value);
@@ -35,6 +36,7 @@ function Chatpage(props) {
     e.target.name === "Upassword" && setupassword(e.target.value);
     e.target.name === "Uusername" && setuusername(e.target.value);
     e.target.name === "friend" && setfriend(e.target.value);
+    e.target.name === "message" && setmessage(e.target.value);
   }
 
   function setProfile(e) {
@@ -129,14 +131,15 @@ function Chatpage(props) {
       </div>
       <div className="data">
         <p>{S.name}, has sent you a friend request.</p>
-        <button class="btn button" onClick={() => { accept(S.name) }} >Accept</button>
+        <button class="btn button col-sm-5 py-2" onClick={() => { accept(S.name) }} >Accept</button> &nbsp; &nbsp;
+        <button class="btn button col-sm-5 py-2" >Decline</button>
       </div>
     </a>
   });
 
 
 
-  
+
 
 
   // Friend list
@@ -159,47 +162,124 @@ function Chatpage(props) {
   }, []);
 
 
-var friendList = friendlist.map((S) => {
-  return <div onClick={ () => {openChat(S.name)} } className="filterMembers all online contact" data-toggle="list">
-    <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-    <div className="status">
-      <i className="material-icons online">fiber_manual_record</i>
+  var friendList = friendlist.map((S) => {
+    return <div onClick={() => { openChat(S.name) }} className="filterMembers all online contact" data-toggle="list" style={{ cursor: "pointer" }}>
+      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
+      <div className="status">
+        <i className="material-icons online">fiber_manual_record</i>
+      </div>
+      <div className="data">
+        <h5>{S.name}</h5>
+        <p>will show last message</p>
+      </div>
+      <div className="person-add">
+        <i className="material-icons">person</i>
+      </div>
     </div>
-    <div className="data">
-      <h5>{S.name}</h5>
-      <p>will show last message</p>
-    </div>
-    <div className="person-add">
-      <i className="material-icons">person</i>
-    </div>
-  </div>
-});
+  });
 
 
 
-const [fname, setfname] = useState([]);
-const [chatName, setchatName] = useState("");
-const [chatProfile, setchatProfile] = useState("");
-const [chatUsername, setchatUsername] = useState("");
-const [chatChats, setchatChats] = useState();
+  const [fname, setfname] = useState([]);
+  const [chatName, setchatName] = useState("");
+  const [chatProfile, setchatProfile] = useState("");
+  const [chatUsername, setchatUsername] = useState("");
+  // const [chatChats, setchatChats] = useState([]);
+  const [messageList, setmessageList] = useState([]);
+  const [messageList2, setmessageList2] = useState([]);
 
-function openChat(fData) {
-    axios.post('http://localhost:3000/friendData/?id='+fData).then(
+  function openChat(fData) {
+    // console.log(fData);
+    axios.post('http://localhost:3000/friendData/?id=' + fData).then(
       (res) => {
         if (res.data.status == "ok") {
           setfname(res.data.data);
           setchatName(res.data.data[0].uname);
-          console.log(chatName);
+          // console.log(chatName);
           setchatUsername(res.data.data[0].uusername);
           setchatProfile(res.data.data[0].profile);
+
+          if (res.data.data[0].chats) {
+          var chat2 = res.data.data[0].chats.filter(function (s) {
+            var friend2 = s.FriendUsername === myUsername.userUserName;
+            // console.log(myUsername.userUserName);
+            return friend2;
+          });
+          console.log(chat2);
+          setmessageList2(chat2.map((S) => { 
+            return <div className="message">
+            <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+            <div className="text-main">
+              <div className="text-group">
+                <div className="text">
+                  <p>{S.Message}</p>
+                </div>
+              </div>
+              <span>{S.Time}</span>
+            </div>
+          </div>
+          }));
         }
-        else {
-          setfname('user not found')
         }
-        console.log(fname);
       }
     )
-}
+
+    // Show My Messages
+    axios.post('http://localhost:3000/myFriends', myUsername).then(
+      (res) => {
+        if (res.data.status == "ok") {
+          if (res.data.data[0].chats) {
+            var chat = res.data.data[0].chats.filter(function (s) {
+              var friend = s.FriendUsername === fData;
+              return friend;
+            });
+            // console.log(chat);
+            setmessageList(chat.map((S) => {
+              return <div className="message me">
+                <div className="text-main">
+                  <div className="text-group me">
+                    <div className="text me">
+                      <p>{S.Message}</p>
+                    </div>
+                  </div>
+                  <span>{S.Time}</span>
+                </div>
+              </div>
+            }));
+          }
+        }
+      }
+      )
+
+    // setchatChats(messageList.map((S) => {
+    //   return <div className="message me">
+    //     <div className="text-main">
+    //       <div className="text-group me">
+    //         <div className="text me">
+    //           <p>{S.Message}</p>
+    //         </div>
+    //       </div>
+    //       <span>{S.Time}</span>
+    //     </div>
+    //   </div>
+    // }))
+
+  }
+
+
+  // send messages
+  function sendMessage(friendUsername) {
+    var today = new Date();
+    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date + ' ' + time;
+    var messageid = Math.random();
+
+    var sendMessage = { userUserName, friendUsername, message, time, date, dateTime, messageid };
+    axios.post('http://localhost:3000/send-message', sendMessage).then((res) => {
+      alert(res.data.data);
+    })
+  }
 
 
 
@@ -209,49 +289,49 @@ function openChat(fData) {
 
 
 
+  return (
+    <main>
+      <div className="layout">
+        {/* Start of Navigation */}
+        <div className="navigation">
+          <div className="container">
+            <div className="inside">
+              <div className="nav nav-tab menu">
+                {/* <button className="btn"><img className="avatar-xl" src="dist/img/avatars/default.png" alt="avatar" /></button> */}
+                <button className="btn"><img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" /></button>
+                <a href="#members" className="active" data-toggle="tab"><i className="material-icons">account_circle</i></a>
+                {/* <a href="#discussions" data-toggle="tab" className="active"><i className="material-icons active">chat_bubble_outline</i></a> */}
+                <a href="#notifications" data-toggle="tab" className="material-icons"><i className="material-icons">notifications_none</i></a>
+                <div data-toggle="tab" className="f-grow1"></div>
 
-
-return (
-  <main>
-    <div className="layout" >
-      {/* Start of Navigation */}
-      <div className="navigation">
-        <div className="container">
-          <div className="inside">
-            <div className="nav nav-tab menu">
-              {/* <button className="btn"><img className="avatar-xl" src="dist/img/avatars/default.png" alt="avatar" /></button> */}
-              <button className="btn"><img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" /></button>
-              <a href="#members" data-toggle="tab"><i className="material-icons">account_circle</i></a>
-              <a href="#discussions" data-toggle="tab" className="active"><i className="material-icons active">chat_bubble_outline</i></a>
-              <a href="#notifications" data-toggle="tab" className="f-grow1"><i className="material-icons">notifications_none</i></a>
-              {/* <button class="btn mode"><i class="material-icons">brightness_2</i></button> */}
-              <a href="#settings" data-toggle="tab"><i className="material-icons">settings</i></a>
-              {/* <button className="btn power" onclick="visitPage();"><i className="material-icons">power_settings_new</i></button> */}
+                {/* <button class="btn mode"><i class="material-icons">brightness_2</i></button> */}
+                <a href="#settings" data-toggle="tab"><i className="material-icons">settings</i></a>
+                {/* <button className="btn power" onclick="visitPage();"><i className="material-icons">power_settings_new</i></button> */}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {/* End of Navigation */}
-      {/* <button onClick={notification}>Check notification</button> */}
-      {/* Start of Sidebar */}
-      <div className="sidebar" id="sidebar">
-        <div className="container">
-          <div className="col-md-12">
-            <div className="tab-content">
-              {/* Start of Contacts */}
-              <div className="tab-pane fade" id="members">
-                <div className="search">
-                  <form className="form-inline position-relative">
-                    <input type="search" className="form-control" id="people" placeholder="Search for people..." />
-                    <button type="button" className="btn btn-link loop"><i className="material-icons">search</i></button>
-                  </form>
-                  <button className="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i className="material-icons">person_add</i></button>
-                </div>
-                <div className="contacts">
-                  <h1>Contacts</h1>
-                  <div className="list-group" id="contacts" role="tablist">
-                    {friendList}
-                    <a href="#" className="filterMembers all online contact" data-toggle="list">
+        {/* End of Navigation */}
+        {/* <button onClick={notification}>Check notification</button> */}
+        {/* Start of Sidebar */}
+        <div className="sidebar" id="sidebar">
+          <div className="container">
+            <div className="col-md-12">
+              <div className="tab-content">
+                {/* Start of Contacts */}
+                <div className="tab-pane fade active show" id="members">
+                  <div className="search">
+                    <form className="form-inline position-relative">
+                      <input type="search" className="form-control" id="people" placeholder="Search for people..." />
+                      <button type="button" className="btn btn-link loop"><i className="material-icons">search</i></button>
+                    </form>
+                    <button className="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i className="material-icons">person_add</i></button>
+                  </div>
+                  <div className="contacts">
+                    <h1>Chats</h1>
+                    <div className="list-group" id="contacts" role="tablist">
+                      {friendList}
+                      {/* <a href="#" className="filterMembers all online contact" data-toggle="list">
                       <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
                       <div className="status">
                         <i className="material-icons online">fiber_manual_record</i>
@@ -367,12 +447,12 @@ return (
                       <div className="person-add">
                         <i className="material-icons">person</i>
                       </div>
-                    </a>
+                    </a> */}
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* End of Contacts */}
-              {/* Start of Discussions */}
+                {/* End of Contacts */}
+                {/* Start of Discussions
               <div id="discussions" className="tab-pane fade active show">
                 <div className="search">
                   <form className="form-inline position-relative">
@@ -497,27 +577,26 @@ return (
                     </a>
                   </div>
                 </div>
-              </div>
-              {/* End of Discussions */}
-              {/* Start of Notifications */}
-              <div id="notifications" className="tab-pane fade">
-                <div className="search">
-                  <form className="form-inline position-relative">
-                    <input type="search" className="form-control" id="notice" placeholder="Filter notifications..." />
-                    <button type="button" className="btn btn-link loop"><i className="material-icons filter-list">filter_list</i></button>
-                  </form>
-                </div>
-                <div className="notifications">
-                  <h1>Notifications</h1>
-                  <div className="list-group" id="alerts" role="tablist">
-                    {mainnotif}
-                    <a href="#" className="filterNotifications all latest notification" data-toggle="list">
+              </div> */}
+                {/* End of Discussions */}
+                {/* Start of Notifications */}
+                <div id="notifications" className="tab-pane fade">
+                  <div className="search">
+                    <form className="form-inline position-relative">
+                      <input type="search" className="form-control" id="notice" placeholder="Filter notifications..." />
+                      <button type="button" className="btn btn-link loop"><i className="material-icons filter-list">filter_list</i></button>
+                    </form>
+                  </div>
+                  <div className="notifications">
+                    <h1>Notifications</h1>
+                    <div className="list-group" id="alerts" role="tablist">
+                      {mainnotif}
+                      {/* <a href="#" className="filterNotifications all latest notification" data-toggle="list">
                       <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
                       <div className="status">
                         <i className="material-icons online">fiber_manual_record</i>
                       </div>
                       <div className="data">
-                        {/* <p>{notif}</p> */}
                         <p>Janette has accepted your friend request on Swipe.</p>
                         <span>Oct 17, 2018</span>
                       </div>
@@ -601,104 +680,104 @@ return (
                         <p>Mildred has a birthday today. Wish him all the best.</p>
                         <span>Jul 19, 2017</span>
                       </div>
-                    </a>
+                    </a> */}
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* End of Notifications */}
-              {/* Start of Settings */}
-              <div className="tab-pane fade" id="settings">
-                <div className="settings">
-                  <div className="profile">
-                    {/* <img className="avatar-xl"  src="dist/img/avatars/default.png" alt="avatar" /> */}
-                    <img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" />
-                    <h1><a href="#">{userName}</a></h1>
-                    <span>{userUserName}</span>
-                  </div>
-                  <div className="categories" id="accordionSettings">
-                    <h1>Settings</h1>
-                    {/* Start of My Account */}
-                    <div className="category">
-                      <a href="#" className="title collapsed" id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        <i className="material-icons md-30 online">person_outline</i>
-                        <div className="data">
-                          <h5>My Account</h5>
-                          <p>Update your profile details</p>
-                        </div>
-                        <i className="material-icons">keyboard_arrow_right</i>
-                      </a>
-                      <div className="collapse" id="collapseOne" aria-labelledby="headingOne" data-parent="#accordionSettings">
-                        <div className="content">
-                          <form>
-                            <div className="upload">
-                              <div className="data">
-                                {/* <img className="avatar-xl" src="dist/img/avatars/default.png" alt="image" /> */}
-                                <img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="image" />
-                                <label>
-                                  <input type="file" onChange={(e) => { setProfile(e) }} />
-                                  <span className="btn button">Upload avatar</span>  {uploadPercentage} %uploaded
-                                </label>
+                {/* End of Notifications */}
+                {/* Start of Settings */}
+                <div className="tab-pane fade" id="settings">
+                  <div className="settings">
+                    <div className="profile">
+                      {/* <img className="avatar-xl"  src="dist/img/avatars/default.png" alt="avatar" /> */}
+                      <img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" />
+                      <h1><a href="#">{userName}</a></h1>
+                      <span>{userUserName}</span>
+                    </div>
+                    <div className="categories" id="accordionSettings">
+                      <h1>Settings</h1>
+                      {/* Start of My Account */}
+                      <div className="category">
+                        <a href="#" className="title collapsed" id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                          <i className="material-icons md-30 online">person_outline</i>
+                          <div className="data">
+                            <h5>My Account</h5>
+                            <p>Update your profile details</p>
+                          </div>
+                          <i className="material-icons">keyboard_arrow_right</i>
+                        </a>
+                        <div className="collapse" id="collapseOne" aria-labelledby="headingOne" data-parent="#accordionSettings">
+                          <div className="content">
+                            <form>
+                              <div className="upload">
+                                <div className="data">
+                                  {/* <img className="avatar-xl" src="dist/img/avatars/default.png" alt="image" /> */}
+                                  <img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="image" />
+                                  <label>
+                                    <input type="file" onChange={(e) => { setProfile(e) }} />
+                                    <span className="btn button">Upload avatar</span>  {uploadPercentage} %uploaded
+                                  </label>
+                                </div>
+                                <p>For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
                               </div>
-                              <p>For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
-                            </div>
-                            {/* <form> */}
-                            <div className="parent">
+                              {/* <form> */}
+                              <div className="parent">
+                                <div className="field">
+                                  <label htmlFor="Name">Name <span>*</span></label>
+                                  <input type="text" name="Uname" value={uname} onChange={(e) => { setValue(e) }} className="form-control" id="Name" placeholder="Name" required />
+                                </div>
+                                <div className="field">
+                                  <label htmlFor="username">username<span>*</span></label>
+                                  <input type="text" name="Uusername" value={uusername} onChange={(e) => { setValue(e) }} className="form-control" id="username" placeholder="username" required />
+                                </div>
+                              </div>
                               <div className="field">
-                                <label htmlFor="Name">Name <span>*</span></label>
-                                <input type="text" name="Uname" value={uname} onChange={(e) => { setValue(e) }} className="form-control" id="Name" placeholder="Name" required />
+                                <label htmlFor="email">Email <span>*</span></label>
+                                <input type="email" name="Uemail" value={uemail} onChange={(e) => { setValue(e) }} className="form-control" id="email" placeholder="Enter your email address" required />
                               </div>
                               <div className="field">
-                                <label htmlFor="username">username<span>*</span></label>
-                                <input type="text" name="Uusername" value={uusername} onChange={(e) => { setValue(e) }} className="form-control" id="username" placeholder="username" required />
+                                <label htmlFor="password">New Password</label>
+                                <input type="password" name="Upassword" value={upassword} onChange={(e) => { setValue(e) }} className="form-control" id="password" placeholder="Enter a new password" required />
                               </div>
-                            </div>
-                            <div className="field">
-                              <label htmlFor="email">Email <span>*</span></label>
-                              <input type="email" name="Uemail" value={uemail} onChange={(e) => { setValue(e) }} className="form-control" id="email" placeholder="Enter your email address" required />
-                            </div>
-                            <div className="field">
-                              <label htmlFor="password">New Password</label>
-                              <input type="password" name="Upassword" value={upassword} onChange={(e) => { setValue(e) }} className="form-control" id="password" placeholder="Enter a new password" required />
-                            </div>
-                            {/* <div className="field">
+                              {/* <div className="field">
                                 <label htmlFor="location">Location</label>
                                 <input type="text" className="form-control" id="location" placeholder="Enter your location" defaultValue="Helena, Montana" required />
                               </div>
                               <button className="btn btn-link w-100">Delete Account</button> */}
-                            <button type="button" className="btn button w-100" onClick={updateDetails} >Apply Changes</button>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                    {/* End of My Account */}
-                    {/* Start of Appearance Settings */}
-                    <div className="category">
-                      <a href="#" className="title collapsed" id="headingFive" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
-                        <i className="material-icons md-30 online">colorize</i>
-                        <div className="data">
-                          <h5>Appearance</h5>
-                          <p>Customize the look of Swipe</p>
-                        </div>
-                        <i className="material-icons">keyboard_arrow_right</i>
-                      </a>
-                      <div className="collapse" id="collapseFive" aria-labelledby="headingFive" data-parent="#accordionSettings">
-                        <div className="content no-layer">
-                          <div className="set">
-                            <div className="details">
-                              <h5>Turn Off Lights</h5>
-                              <p>The dark mode is applied to core areas of the app that are normally displayed as light.</p>
-                            </div>
-                            <label className="switch">
-                              <input type="checkbox" />
-                              <span className="slider round mode" />
-                            </label>
+                              <button type="button" className="btn button w-100" onClick={updateDetails} >Apply Changes</button>
+                            </form>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    {/* End of Appearance Settings */}
-                    {/* Start of Logout */}
-                    <div className="category">
+                      {/* End of My Account */}
+                      {/* Start of Appearance Settings */}
+                      <div className="category">
+                        <a href="#" className="title collapsed" id="headingFive" data-toggle="collapse" data-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
+                          <i className="material-icons md-30 online">colorize</i>
+                          <div className="data">
+                            <h5>Appearance</h5>
+                            <p>Customize the look of Swipe</p>
+                          </div>
+                          <i className="material-icons">keyboard_arrow_right</i>
+                        </a>
+                        <div className="collapse" id="collapseFive" aria-labelledby="headingFive" data-parent="#accordionSettings">
+                          <div className="content no-layer">
+                            <div className="set">
+                              <div className="details">
+                                <h5>Turn Off Lights</h5>
+                                <p>The dark mode is applied to core areas of the app that are normally displayed as light.</p>
+                              </div>
+                              <label className="switch">
+                                <input type="checkbox" />
+                                <span className="slider round mode" />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {/* End of Appearance Settings */}
+                      {/* Start of Logout */}
+                      {/* <div className="category">
                       <a href="sign-in.html" className="title collapsed">
                         <i className="material-icons md-30 online">power_settings_new</i>
                         <div className="data">
@@ -707,49 +786,49 @@ return (
                         </div>
                         <i className="material-icons">keyboard_arrow_right</i>
                       </a>
+                    </div> */}
+                      {/* End of Logout */}
                     </div>
-                    {/* End of Logout */}
                   </div>
                 </div>
+                {/* End of Settings */}
               </div>
-              {/* End of Settings */}
             </div>
           </div>
         </div>
-      </div>
-      {/* End of Sidebar */}
-      {/* Start of Add Friends */}
-      <div className="modal fade" id="exampleModalCenter" tabIndex={-1} role="dialog" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered" role="document">
-          <div className="requests">
-            <div className="title">
-              <h1>Add your friends</h1>
-              <button type="button" className="btn" data-dismiss="modal" aria-label="Close"><i className="material-icons">close</i></button>
-            </div>
-            <div className="content">
-              <form>
-                <div className="form-group">
-                  <label htmlFor="user">Username:</label>
-                  <input name="friend" value={friend} onChange={(e) => { setValue(e); }} type="text" className="form-control" id="user" placeholder="Add recipient..." required />
-                  {/* <div className="user" id="contact">
+        {/* End of Sidebar */}
+        {/* Start of Add Friends */}
+        <div className="modal fade" id="exampleModalCenter" tabIndex={-1} role="dialog" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="requests">
+              <div className="title">
+                <h1>Add your friends</h1>
+                <button type="button" className="btn" data-dismiss="modal" aria-label="Close"><i className="material-icons">close</i></button>
+              </div>
+              <div className="content">
+                <form>
+                  <div className="form-group">
+                    <label htmlFor="user">Username:</label>
+                    <input name="friend" value={friend} onChange={(e) => { setValue(e); }} type="text" className="form-control" id="user" placeholder="Add recipient..." required />
+                    {/* <div className="user" id="contact">
                       <img className="avatar-sm" src="dist/img/avatars/avatar-female-5.jpg" alt="avatar" />
                       <h5>Keith Morris</h5>
                       <button className="btn"><i className="material-icons">close</i></button>
                     </div> */}
-                </div>
-                {/* <div className="form-group">
+                  </div>
+                  {/* <div className="form-group">
                     <label htmlFor="welcome">Message:</label>
                     <textarea className="text-control" id="welcome" placeholder="Send your welcome message..." defaultValue={"Hi Keith, I'd like to add you as a contact."} />
                   </div> */}
-                <button type="button" onClick={addFriend} className="btn button w-100">Send Friend Request</button>
-              </form>
+                  <button type="button" onClick={addFriend} className="btn button w-100">Send Friend Request</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      {/* End of Add Friends */}
-      {/* Start of Create Chat */}
-      <div className="modal fade" id="startnewchat" tabIndex={-1} role="dialog" aria-hidden="true">
+        {/* End of Add Friends */}
+        {/* Start of Create Chat */}
+        {/* <div className="modal fade" id="startnewchat" tabIndex={-1} role="dialog" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered" role="document">
           <div className="requests">
             <div className="title">
@@ -780,188 +859,192 @@ return (
             </div>
           </div>
         </div>
-      </div>
-      {/* End of Create Chat */}
-      <div className="main">
-        <div className="tab-content" id="nav-tabContent">
-          {/* Start of Babble */}
-          <div className="babble tab-pane fade active show" id="list-chat" role="tabpanel" aria-labelledby="list-chat-list">
-            {/* Start of Chat */}
-            <div className="chat" id="chat1">
-              <div className="top">
-                <div className="container">
-                  <div className="col-md-12">
-                    <div className="inside">
-                      <a href="#"><img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" /></a>
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5><a href="#">{chatName}</a></h5>
-                        <span>Active now</span>
-                      </div>
-                      {/* <button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-30">phone_in_talk</i></button>
+      </div> */}
+        {/* End of Create Chat */}
+        <div className="main">
+          <div className="tab-content" id="nav-tabContent">
+            {/* Start of Babble */}
+            <div className="babble tab-pane fade active show" id="list-chat" role="tabpanel" aria-labelledby="list-chat-list">
+              {/* Start of Chat */}
+              <div className="chat" id="chat1">
+                <div className="top">
+                  <div className="container">
+                    <div className="col-md-12">
+                      <div className="inside">
+                        <a href="#"><img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" /></a>
+                        <div className="status">
+                          <i className="material-icons online">fiber_manual_record</i>
+                        </div>
+                        <div className="data">
+                          <h5><a href="#">{chatName}</a></h5>
+                          <span>{chatUsername}</span>
+                        </div>
+                        {/* <button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-30">phone_in_talk</i></button>
 												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-36">videocam</i></button> */}
-                      <button className="btn d-md-block d-none"><i className="material-icons md-30">info</i></button>
-                      <div className="dropdown">
-                        <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
-                        <div className="dropdown-menu dropdown-menu-right">
-                          <button className="dropdown-item connect" name={1}><i className="material-icons">phone_in_talk</i>Voice Call</button>
-                          <button className="dropdown-item connect" name={1}><i className="material-icons">videocam</i>Video Call</button>
-                          <hr />
-                          <button className="dropdown-item"><i className="material-icons">clear</i>Clear History</button>
-                          <button className="dropdown-item"><i className="material-icons">block</i>Block Contact</button>
-                          <button className="dropdown-item"><i className="material-icons">delete</i>Delete Contact</button>
+                        <button className="btn d-md-block d-none"><i className="material-icons md-30">info</i></button>
+                        <div className="dropdown">
+                          <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
+                          <div className="dropdown-menu dropdown-menu-right">
+                            <button className="dropdown-item connect" name={1}><i className="material-icons">phone_in_talk</i>Voice Call</button>
+                            <button className="dropdown-item connect" name={1}><i className="material-icons">videocam</i>Video Call</button>
+                            <hr />
+                            <button className="dropdown-item"><i className="material-icons">clear</i>Clear History</button>
+                            <button className="dropdown-item"><i className="material-icons">block</i>Block Contact</button>
+                            <button className="dropdown-item"><i className="material-icons">delete</i>Delete Contact</button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="content" id="content">
-                <div className="container">
-                  <div className="col-md-12">
-                    <div className="date">
-                      <hr />
-                      <span>Yesterday</span>
-                      <hr />
-                    </div>
-                    <div className="message">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="text-main">
-                        <div className="text-group">
-                          <div className="text">
-                            <p>We've got some killer ideas kicking about already.</p>
-                          </div>
-                        </div>
-                        <span>09:46 AM</span>
+                <div className="content" id="content">
+                  <div className="container">
+                    <div className="col-md-12">
+                      <div className="date">
+                        <hr />
+                        <span>Yesterday</span>
+                        <hr />
                       </div>
-                    </div>
-                    <div className="message me">
-                      <div className="text-main">
-                        <div className="text-group me">
-                          <div className="text me">
-                            <p>Can't wait! How are we coming along with the client?</p>
+
+                      {messageList}
+                      {messageList2}
+
+                      {/* <div className="message">
+                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+                        <div className="text-main">
+                          <div className="text-group">
+                            <div className="text">
+                              <p>We've got some killer ideas kicking about already.</p>
+                            </div>
                           </div>
+                          <span>09:46 AM</span>
                         </div>
-                        <span>11:32 AM</span>
                       </div>
-                    </div>
-                    <div className="message">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="text-main">
-                        <div className="text-group">
-                          <div className="text">
-                            <p>Coming along nicely, we've got a draft for the client quarries completed.</p>
+                      <div className="message me">
+                        <div className="text-main">
+                          <div className="text-group me">
+                            <div className="text me">
+                              <p>Can't wait! How are we coming along with the client?</p>
+                            </div>
                           </div>
+                          <span>11:32 AM</span>
                         </div>
-                        <span>02:56 PM</span>
                       </div>
-                    </div>
-                    <div className="message me">
-                      <div className="text-main">
-                        <div className="text-group me">
-                          <div className="text me">
-                            <p>Roger that boss!</p>
+                      <div className="message">
+                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+                        <div className="text-main">
+                          <div className="text-group">
+                            <div className="text">
+                              <p>Coming along nicely, we've got a draft for the client quarries completed.</p>
+                            </div>
                           </div>
+                          <span>02:56 PM</span>
                         </div>
-                        <div className="text-group me">
-                          <div className="text me">
-                            <p>I have already started gathering some stuff for the mood boards, excited to start!</p>
-                          </div>
-                        </div>
-                        <span>10:21 PM</span>
                       </div>
-                    </div>
-                    <div className="message">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="text-main">
-                        <div className="text-group">
-                          <div className="text">
-                            <p>Great start guys, I've added some notes to the task. We may need to make some adjustments to the last couple of items - but no biggie!</p>
+                      <div className="message me">
+                        <div className="text-main">
+                          <div className="text-group me">
+                            <div className="text me">
+                              <p>Roger that boss!</p>
+                            </div>
                           </div>
-                        </div>
-                        <span>11:07 PM</span>
-                      </div>
-                    </div>
-                    <div className="date">
-                      <hr />
-                      <span>Today</span>
-                      <hr />
-                    </div>
-                    <div className="message me">
-                      <div className="text-main">
-                        <div className="text-group me">
-                          <div className="text me">
-                            <p>Well done all. See you all at 2 for the kick-off meeting.</p>
+                          <div className="text-group me">
+                            <div className="text me">
+                              <p>I have already started gathering some stuff for the mood boards, excited to start!</p>
+                            </div>
                           </div>
+                          <span>10:21 PM</span>
                         </div>
-                        <span>10:21 PM</span>
                       </div>
-                    </div>
-                    <div className="message">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="text-main">
-                        <div className="text-group">
-                          <div className="text">
-                            <div className="attachment">
-                              <button className="btn attach"><i className="material-icons md-18">insert_drive_file</i></button>
-                              <div className="file">
-                                <h5><a href="#">Tenacy Agreement.pdf</a></h5>
-                                <span>24kb Document</span>
+                      <div className="message">
+                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+                        <div className="text-main">
+                          <div className="text-group">
+                            <div className="text">
+                              <p>Great start guys, I've added some notes to the task. We may need to make some adjustments to the last couple of items - but no biggie!</p>
+                            </div>
+                          </div>
+                          <span>11:07 PM</span>
+                        </div>
+                      </div>
+                      <div className="date">
+                        <hr />
+                        <span>Today</span>
+                        <hr />
+                      </div>
+                      <div className="message me">
+                        <div className="text-main">
+                          <div className="text-group me">
+                            <div className="text me">
+                              <p>Well done all. See you all at 2 for the kick-off meeting.</p>
+                            </div>
+                          </div>
+                          <span>10:21 PM</span>
+                        </div>
+                      </div>
+                      <div className="message">
+                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+                        <div className="text-main">
+                          <div className="text-group">
+                            <div className="text">
+                              <div className="attachment">
+                                <button className="btn attach"><i className="material-icons md-18">insert_drive_file</i></button>
+                                <div className="file">
+                                  <h5><a href="#">Tenacy Agreement.pdf</a></h5>
+                                  <span>24kb Document</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <span>11:07 PM</span>
+                        </div>
+                      </div>
+                      <div className="message me">
+                        <div className="text-main">
+                          <div className="text-group me">
+                            <div className="text me">
+                              <p>Hope you're all ready to tackle this great project. Let's smash some Brand Concept &amp; Design!</p>
+                            </div>
+                          </div>
+                          <span><i className="material-icons">check</i>10:21 PM</span>
+                        </div>
+                      </div>
+                      <div className="message">
+                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+                        <div className="text-main">
+                          <div className="text-group">
+                            <div className="text typing">
+                              <div className="wave">
+                                <span className="dot" />
+                                <span className="dot" />
+                                <span className="dot" />
                               </div>
                             </div>
                           </div>
                         </div>
-                        <span>11:07 PM</span>
-                      </div>
+                      </div> */}
                     </div>
-                    <div className="message me">
-                      <div className="text-main">
-                        <div className="text-group me">
-                          <div className="text me">
-                            <p>Hope you're all ready to tackle this great project. Let's smash some Brand Concept &amp; Design!</p>
-                          </div>
-                        </div>
-                        <span><i className="material-icons">check</i>10:21 PM</span>
+                  </div>
+                </div>
+                <div className="container">
+                  <div className="col-md-12">
+                    <div className="bottom">
+                      <div className="position-relative w-100">
+                        <textarea name="message" value={message} onChange={(e) => { setValue(e); }} className="form-control" placeholder="Start typing..." rows={1} defaultValue={""} />
+                        <button className="btn emoticons"><i className="material-icons">insert_emoticon</i></button>
+                        <button onClick={() => { sendMessage(chatUsername) }} type="reset" className="btn send"><i className="material-icons">send</i></button>
                       </div>
-                    </div>
-                    <div className="message">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="text-main">
-                        <div className="text-group">
-                          <div className="text typing">
-                            <div className="wave">
-                              <span className="dot" />
-                              <span className="dot" />
-                              <span className="dot" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <label>
+                        <input type="file" />
+                        <span className="btn attach d-sm-block d-none"><i className="material-icons">attach_file</i></span>
+                      </label>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="container">
-                <div className="col-md-12">
-                  <div className="bottom">
-                    <form className="position-relative w-100">
-                      <textarea className="form-control" placeholder="Start typing for reply..." rows={1} defaultValue={""} />
-                      <button className="btn emoticons"><i className="material-icons">insert_emoticon</i></button>
-                      <button type="submit" className="btn send"><i className="material-icons">send</i></button>
-                    </form>
-                    <label>
-                      <input type="file" />
-                      <span className="btn attach d-sm-block d-none"><i className="material-icons">attach_file</i></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* End of Chat */}
-            {/* Start of Call */}
-            <div className="call" id="call1">
+              {/* End of Chat */}
+              {/* Start of Call */}
+              {/* <div className="call" id="call1">
               <div className="content">
                 <div className="container">
                   <div className="col-md-12">
@@ -984,103 +1067,103 @@ return (
                   </div>
                 </div>
               </div>
+            </div> */}
+              {/* End of Call */}
             </div>
-            {/* End of Call */}
-          </div>
-          {/* End of Babble */}
-          {/* Start of Babble */}
-          <div className="babble tab-pane fade" id="list-empty" role="tabpanel" aria-labelledby="list-empty-list">
-            {/* Start of Chat */}
-            <div className="chat" id="chat2">
-              <div className="top">
+            {/* End of Babble */}
+            {/* Start of Babble */}
+            <div className="babble tab-pane fade" id="list-empty" role="tabpanel" aria-labelledby="list-empty-list">
+              {/* Start of Chat */}
+              <div className="chat" id="chat2">
+                <div className="top">
+                  <div className="container">
+                    <div className="col-md-12">
+                      <div className="inside">
+                        <a href="#"><img className="avatar-md" src="dist/img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar" /></a>
+                        <div className="status">
+                          <i className="material-icons offline">fiber_manual_record</i>
+                        </div>
+                        <div className="data">
+                          <h5><a href="#">Lean Avent</a></h5>
+                          <span>Inactive</span>
+                        </div>
+                        <button className="btn connect d-md-block d-none" name={2}><i className="material-icons md-30">phone_in_talk</i></button>
+                        <button className="btn connect d-md-block d-none" name={2}><i className="material-icons md-36">videocam</i></button>
+                        <button className="btn d-md-block d-none"><i className="material-icons md-30">info</i></button>
+                        <div className="dropdown">
+                          <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
+                          <div className="dropdown-menu dropdown-menu-right">
+                            <button className="dropdown-item connect" name={2}><i className="material-icons">phone_in_talk</i>Voice Call</button>
+                            <button className="dropdown-item connect" name={2}><i className="material-icons">videocam</i>Video Call</button>
+                            <hr />
+                            <button className="dropdown-item"><i className="material-icons">clear</i>Clear History</button>
+                            <button className="dropdown-item"><i className="material-icons">block</i>Block Contact</button>
+                            <button className="dropdown-item"><i className="material-icons">delete</i>Delete Contact</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="content empty">
+                  <div className="container">
+                    <div className="col-md-12">
+                      <div className="no-messages">
+                        <i className="material-icons md-48">forum</i>
+                        <p>Seems people are shy to start the chat. Break the ice send the first message.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div className="container">
                   <div className="col-md-12">
-                    <div className="inside">
-                      <a href="#"><img className="avatar-md" src="dist/img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar" /></a>
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5><a href="#">Lean Avent</a></h5>
-                        <span>Inactive</span>
-                      </div>
-                      <button className="btn connect d-md-block d-none" name={2}><i className="material-icons md-30">phone_in_talk</i></button>
-                      <button className="btn connect d-md-block d-none" name={2}><i className="material-icons md-36">videocam</i></button>
-                      <button className="btn d-md-block d-none"><i className="material-icons md-30">info</i></button>
-                      <div className="dropdown">
-                        <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
-                        <div className="dropdown-menu dropdown-menu-right">
-                          <button className="dropdown-item connect" name={2}><i className="material-icons">phone_in_talk</i>Voice Call</button>
-                          <button className="dropdown-item connect" name={2}><i className="material-icons">videocam</i>Video Call</button>
-                          <hr />
-                          <button className="dropdown-item"><i className="material-icons">clear</i>Clear History</button>
-                          <button className="dropdown-item"><i className="material-icons">block</i>Block Contact</button>
-                          <button className="dropdown-item"><i className="material-icons">delete</i>Delete Contact</button>
+                    <div className="bottom">
+                      <form className="position-relative w-100">
+                        <textarea className="form-control" placeholder="Start typing for reply..." rows={1} defaultValue={""} />
+                        <button className="btn emoticons"><i className="material-icons">insert_emoticon</i></button>
+                        <button type="submit" className="btn send"><i className="material-icons">send</i></button>
+                      </form>
+                      <label>
+                        <input type="file" />
+                        <span className="btn attach d-sm-block d-none"><i className="material-icons">attach_file</i></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* End of Chat */}
+              {/* Start of Call */}
+              <div className="call" id="call2">
+                <div className="content">
+                  <div className="container">
+                    <div className="col-md-12">
+                      <div className="inside">
+                        <div className="panel">
+                          <div className="participant">
+                            <img className="avatar-xxl" src="dist/img/avatars/avatar-female-2.jpg" alt="avatar" />
+                            <span>Connecting</span>
+                          </div>
+                          <div className="options">
+                            <button className="btn option"><i className="material-icons md-30">mic</i></button>
+                            <button className="btn option"><i className="material-icons md-30">videocam</i></button>
+                            <button className="btn option call-end"><i className="material-icons md-30">call_end</i></button>
+                            <button className="btn option"><i className="material-icons md-30">person_add</i></button>
+                            <button className="btn option"><i className="material-icons md-30">volume_up</i></button>
+                          </div>
+                          <button className="btn back" name={2}><i className="material-icons md-24">chat</i></button>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="content empty">
-                <div className="container">
-                  <div className="col-md-12">
-                    <div className="no-messages">
-                      <i className="material-icons md-48">forum</i>
-                      <p>Seems people are shy to start the chat. Break the ice send the first message.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="container">
-                <div className="col-md-12">
-                  <div className="bottom">
-                    <form className="position-relative w-100">
-                      <textarea className="form-control" placeholder="Start typing for reply..." rows={1} defaultValue={""} />
-                      <button className="btn emoticons"><i className="material-icons">insert_emoticon</i></button>
-                      <button type="submit" className="btn send"><i className="material-icons">send</i></button>
-                    </form>
-                    <label>
-                      <input type="file" />
-                      <span className="btn attach d-sm-block d-none"><i className="material-icons">attach_file</i></span>
-                    </label>
-                  </div>
-                </div>
-              </div>
+              {/* End of Call */}
             </div>
-            {/* End of Chat */}
-            {/* Start of Call */}
-            <div className="call" id="call2">
-              <div className="content">
-                <div className="container">
-                  <div className="col-md-12">
-                    <div className="inside">
-                      <div className="panel">
-                        <div className="participant">
-                          <img className="avatar-xxl" src="dist/img/avatars/avatar-female-2.jpg" alt="avatar" />
-                          <span>Connecting</span>
-                        </div>
-                        <div className="options">
-                          <button className="btn option"><i className="material-icons md-30">mic</i></button>
-                          <button className="btn option"><i className="material-icons md-30">videocam</i></button>
-                          <button className="btn option call-end"><i className="material-icons md-30">call_end</i></button>
-                          <button className="btn option"><i className="material-icons md-30">person_add</i></button>
-                          <button className="btn option"><i className="material-icons md-30">volume_up</i></button>
-                        </div>
-                        <button className="btn back" name={2}><i className="material-icons md-24">chat</i></button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* End of Call */}
-          </div>
-          {/* End of Babble */}
-          {/* Start of Babble */}
-          <div className="babble tab-pane fade" id="list-request" role="tabpanel" aria-labelledby="list-request-list">
-            {/* Start of Chat */}
-            <div className="chat" id="chat3">
+            {/* End of Babble */}
+            {/* Start of Babble */}
+            <div className="babble tab-pane fade" id="list-request" role="tabpanel" aria-labelledby="list-request-list">
+              {/* Start of Chat */}
+              {/* <div className="chat" id="chat3">
               <div className="top">
                 <div className="container">
                   <div className="col-md-12">
@@ -1140,15 +1223,15 @@ return (
                   </div>
                 </div>
               </div>
+            </div> */}
+              {/* End of Chat */}
             </div>
-            {/* End of Chat */}
+            {/* End of Babble */}
           </div>
-          {/* End of Babble */}
         </div>
-      </div>
-    </div> {/* Layout */}
-  </main>
-)
+      </div> {/* Layout */}
+    </main>
+  )
 }
 
 export default Chatpage
