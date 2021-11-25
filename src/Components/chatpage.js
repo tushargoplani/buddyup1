@@ -184,87 +184,94 @@ function Chatpage(props) {
   const [chatName, setchatName] = useState("");
   const [chatProfile, setchatProfile] = useState("");
   const [chatUsername, setchatUsername] = useState("");
-  // const [chatChats, setchatChats] = useState([]);
+  const [sortedMergeMessages, setsortedMergeMessages] = useState([]);
   const [messageList, setmessageList] = useState([]);
   const [messageList2, setmessageList2] = useState([]);
+  // var sortedMergeMessages;
 
   function openChat(fData) {
     // console.log(fData);
-    axios.post('http://localhost:3000/friendData/?id=' + fData).then(
-      (res) => {
-        if (res.data.status == "ok") {
-          setfname(res.data.data);
-          setchatName(res.data.data[0].uname);
-          // console.log(chatName);
-          setchatUsername(res.data.data[0].uusername);
-          setchatProfile(res.data.data[0].profile);
+    setInterval(() => {
+      axios.post('http://localhost:3000/friendData/?id=' + fData).then(
+        (res) => {
+          if (res.data.status == "ok") {
+            setfname(res.data.data);
+            setchatName(res.data.data[0].uname);
+            // console.log(chatName);
+            setchatUsername(res.data.data[0].uusername);
+            setchatProfile(res.data.data[0].profile);
 
-          if (res.data.data[0].chats) {
-          var chat2 = res.data.data[0].chats.filter(function (s) {
-            var friend2 = s.FriendUsername === myUsername.userUserName;
-            // console.log(myUsername.userUserName);
-            return friend2;
-          });
-          console.log(chat2);
-          setmessageList2(chat2.map((S) => { 
-            return <div className="message">
-            <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-            <div className="text-main">
-              <div className="text-group">
-                <div className="text">
-                  <p>{S.Message}</p>
-                </div>
-              </div>
-              <span>{S.Time}</span>
-            </div>
-          </div>
-          }));
-        }
-        }
-      }
-    )
-
-    // Show My Messages
-    axios.post('http://localhost:3000/myFriends', myUsername).then(
-      (res) => {
-        if (res.data.status == "ok") {
-          if (res.data.data[0].chats) {
-            var chat = res.data.data[0].chats.filter(function (s) {
-              var friend = s.FriendUsername === fData;
-              return friend;
-            });
-            // console.log(chat);
-            setmessageList(chat.map((S) => {
-              return <div className="message me">
-                <div className="text-main">
-                  <div className="text-group me">
-                    <div className="text me">
-                      <p>{S.Message}</p>
+            if (res.data.data[0].chats) {
+              var chat2 = res.data.data[0].chats.filter(function (s) {
+                var friend2 = s.FriendUsername === myUsername.userUserName;
+                // console.log(myUsername.userUserName);
+                return friend2;
+              });
+              // console.log(chat2);
+              setmessageList2(chat2.map((S) => {
+                return <div className="message">
+                  <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
+                  <div className="text-main">
+                    <div className="text-group">
+                      <div className="text">
+                        <p>{S.Message}</p>
+                      </div>
                     </div>
+                    <span>{S.Time}</span>
                   </div>
-                  <span>{S.Time}</span>
                 </div>
-              </div>
-            }));
+              }));
+            }
           }
         }
-      }
       )
 
-    // setchatChats(messageList.map((S) => {
-    //   return <div className="message me">
-    //     <div className="text-main">
-    //       <div className="text-group me">
-    //         <div className="text me">
-    //           <p>{S.Message}</p>
-    //         </div>
-    //       </div>
-    //       <span>{S.Time}</span>
-    //     </div>
-    //   </div>
-    // }))
+      // Show My Messages
+      axios.post('http://localhost:3000/myFriends', myUsername).then(
+        (res) => {
+          if (res.data.status == "ok") {
+            if (res.data.data[0].chats) {
+              var chat = res.data.data[0].chats.filter(function (s) {
+                var friend = s.FriendUsername === fData;
+                return friend;
+              });
+              // console.log(chat);
+              setmessageList(chat.map((S) => {
+                return <div className="message me">
+                  <div className="text-main">
+                    <div className="text-group me">
+                      <div className="text me">
+                        <p>{S.Message}</p>
+                      </div>
+                    </div>
+                    <span>{S.Time}</span>
+                  </div>
+                </div>
+              }));
+            }
+          }
+        }
+      )
 
+    }, 300)
   }
+
+  useEffect(() => {
+    // console.log(messageList);
+    // console.log(messageList2);
+    var mergeMessages = [...messageList2, ...messageList];
+    console.log(mergeMessages);
+    function msgSort(a, b) {
+      var frst = new Date(a.dateTime);
+      var scnd = new Date(b.dateTime);
+      return frst - scnd;
+    }
+    setsortedMergeMessages(mergeMessages.sort(msgSort))
+    // console.log(sortedMergeMessages);
+  }, [messageList, messageList2])
+
+
+
 
 
   // send messages
@@ -906,8 +913,7 @@ function Chatpage(props) {
                         <hr />
                       </div>
 
-                      {messageList}
-                      {messageList2}
+                      {sortedMergeMessages}
 
                       {/* <div className="message">
                         <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
