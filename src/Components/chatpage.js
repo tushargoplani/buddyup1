@@ -187,7 +187,6 @@ function Chatpage(props) {
   const [sortedMergeMessages, setsortedMergeMessages] = useState([]);
   const [messageList, setmessageList] = useState([]);
   const [messageList2, setmessageList2] = useState([]);
-  // var sortedMergeMessages;
 
   function openChat(fData) {
     // console.log(fData);
@@ -208,19 +207,7 @@ function Chatpage(props) {
                 return friend2;
               });
               // console.log(chat2);
-              setmessageList2(chat2.map((S) => {
-                return <div className="message">
-                  <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                  <div className="text-main">
-                    <div className="text-group">
-                      <div className="text">
-                        <p>{S.Message}</p>
-                      </div>
-                    </div>
-                    <span>{S.Time}</span>
-                  </div>
-                </div>
-              }));
+              setmessageList2(chat2);
             }
           }
         }
@@ -236,18 +223,7 @@ function Chatpage(props) {
                 return friend;
               });
               // console.log(chat);
-              setmessageList(chat.map((S) => {
-                return <div className="message me">
-                  <div className="text-main">
-                    <div className="text-group me">
-                      <div className="text me">
-                        <p>{S.Message}</p>
-                      </div>
-                    </div>
-                    <span>{S.Time}</span>
-                  </div>
-                </div>
-              }));
+              setmessageList(chat);
             }
           }
         }
@@ -257,13 +233,11 @@ function Chatpage(props) {
   }
 
   useEffect(() => {
-    // console.log(messageList);
-    // console.log(messageList2);
     var mergeMessages = [...messageList2, ...messageList];
-    console.log(mergeMessages);
+    // console.log(mergeMessages);
     function msgSort(a, b) {
-      var frst = new Date(a.dateTime);
-      var scnd = new Date(b.dateTime);
+      var frst = new Date(a.DateTime);
+      var scnd = new Date(b.DateTime);
       return frst - scnd;
     }
     setsortedMergeMessages(mergeMessages.sort(msgSort))
@@ -913,7 +887,21 @@ function Chatpage(props) {
                         <hr />
                       </div>
 
-                      {sortedMergeMessages}
+                      {/* {sortedMergeMessages} */}
+                      {(() => {
+                        return sortedMergeMessages.map((s)=>{return <div className={s.FriendUsername == myUsername.userUserName ? "message" : "message me"}>
+                                {s.FriendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />}
+                                 <div className="text-main">
+                                   <div className="text-group">
+                                     <div className="text">
+                                       <p>{s.Message}</p>
+                                     </div>
+                                   </div>
+                                   <span>{s.Time}</span>
+                                 </div>
+                               </div>
+                               })
+                      })()}
 
                       {/* <div className="message">
                         <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
