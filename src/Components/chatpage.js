@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-
+// import ScrollableFeed from 'react-scrollable-feed';
 
 
 function Chatpage(props) {
@@ -187,33 +187,41 @@ function Chatpage(props) {
   const [sortedMergeMessages, setsortedMergeMessages] = useState([]);
   const [messageList, setmessageList] = useState([]);
   const [messageList2, setmessageList2] = useState([]);
+  const [refreshId, setrefreshId] = useState()
 
   function openChat(fData) {
-    // console.log(fData);
-    setInterval(() => {
+    // console.log(refreshId);
+    clearInterval(refreshId);
+    axios.post('http://localhost:3000/friendData/?id=' + fData).then(
+      (res) => {
+        if (res.data.status == "ok") {
+          setfname(res.data.data);
+          setchatName(res.data.data[0].uname);
+          // console.log(chatName);
+          setchatUsername(res.data.data[0].uusername);
+          setchatProfile(res.data.data[0].profile);
+        }
+      }
+    )
+
+    setrefreshId(setInterval(() => {
+      // show friend msg
       axios.post('http://localhost:3000/friendData/?id=' + fData).then(
         (res) => {
-          if (res.data.status == "ok") {
-            setfname(res.data.data);
-            setchatName(res.data.data[0].uname);
-            // console.log(chatName);
-            setchatUsername(res.data.data[0].uusername);
-            setchatProfile(res.data.data[0].profile);
-
-            if (res.data.data[0].chats) {
-              var chat2 = res.data.data[0].chats.filter(function (s) {
-                var friend2 = s.FriendUsername === myUsername.userUserName;
-                // console.log(myUsername.userUserName);
-                return friend2;
-              });
-              // console.log(chat2);
-              setmessageList2(chat2);
-            }
+          if (res.data.data[0].chats) {
+            var chat2 = res.data.data[0].chats.filter(function (s) {
+              var friend2 = s.FriendUsername === myUsername.userUserName;
+              // console.log(myUsername.userUserName);
+              return friend2;
+            });
+            // console.log(chat2);
+            setmessageList2(chat2);
           }
         }
       )
 
       // Show My Messages
+      // console.log(myUsername);
       axios.post('http://localhost:3000/myFriends', myUsername).then(
         (res) => {
           if (res.data.status == "ok") {
@@ -229,7 +237,7 @@ function Chatpage(props) {
         }
       )
 
-    }, 300)
+    }, 300))
   }
 
   useEffect(() => {
@@ -242,11 +250,15 @@ function Chatpage(props) {
     }
     setsortedMergeMessages(mergeMessages.sort(msgSort))
     // console.log(sortedMergeMessages);
-  }, [messageList, messageList2])
+
+  }, [messageList.length, messageList2.length])
 
 
 
-
+  const messagesEndRef = useRef(null);
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({behavior: 'smooth',inline: 'nearest'});
+  }, [sortedMergeMessages.length])
 
   // send messages
   function sendMessage(friendUsername) {
@@ -258,8 +270,9 @@ function Chatpage(props) {
 
     var sendMessage = { userUserName, friendUsername, message, time, date, dateTime, messageid };
     axios.post('http://localhost:3000/send-message', sendMessage).then((res) => {
-      alert(res.data.data);
+      // alert(res.data.data);
     })
+    setmessage('');
   }
 
 
@@ -880,28 +893,31 @@ function Chatpage(props) {
                 </div>
                 <div className="content" id="content">
                   <div className="container">
-                    <div className="col-md-12">
-                      <div className="date">
+                    <div className="col-md-12 messages">
+                      {/* <div className="date">
                         <hr />
                         <span>Yesterday</span>
                         <hr />
-                      </div>
+                      </div> */}
 
-                      {/* {sortedMergeMessages} */}
-                      {(() => {
-                        return sortedMergeMessages.map((s)=>{return <div className={s.FriendUsername == myUsername.userUserName ? "message" : "message me"}>
-                                {s.FriendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />}
-                                 <div className="text-main">
-                                   <div className="text-group">
-                                     <div className="text">
-                                       <p>{s.Message}</p>
-                                     </div>
-                                   </div>
-                                   <span>{s.Time}</span>
-                                 </div>
-                               </div>
-                               })
-                      })()}
+                      {/* <ScrollableFeed> */}
+                        {(() => {
+                          return sortedMergeMessages.map((s) => {
+                            return <div className={s.FriendUsername == myUsername.userUserName ? "message" : "message me"}>
+                              {s.FriendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />}
+                              <div className="text-main">
+                                <div className={s.FriendUsername == myUsername.userUserName ? "text-group" : "text-group me"}>
+                                  <div className={s.FriendUsername == myUsername.userUserName ? "text" : "text me"}>
+                                    <p>{s.Message}</p>
+                                  </div>
+                                </div>
+                                <span>{s.Time}</span>
+                              </div>
+                            </div>
+                          })
+                        })()}
+                        <div ref={messagesEndRef}></div>
+                      {/* </ScrollableFeed> */}
 
                       {/* <div className="message">
                         <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
@@ -1026,7 +1042,7 @@ function Chatpage(props) {
                       <div className="position-relative w-100">
                         <textarea name="message" value={message} onChange={(e) => { setValue(e); }} className="form-control" placeholder="Start typing..." rows={1} defaultValue={""} />
                         <button className="btn emoticons"><i className="material-icons">insert_emoticon</i></button>
-                        <button onClick={() => { sendMessage(chatUsername) }} type="reset" className="btn send"><i className="material-icons">send</i></button>
+                        <button onClick={() => { sendMessage(chatUsername) }} className="btn send"><i className="material-icons">send</i></button>
                       </div>
                       <label>
                         <input type="file" />
