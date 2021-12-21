@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-// import ScrollableFeed from 'react-scrollable-feed';
+import Picker from 'emoji-picker-react';
 
 
 function Chatpage(props) {
@@ -99,27 +99,27 @@ function Chatpage(props) {
 
 
 
-
-
   var myUsername = { userUserName };
+
+  // notifications
   const [notification, setnotification] = useState([]);
   useEffect(() => {
-    axios.post('http://localhost:3000/get-notif', myUsername).then(
-
-      (res) => {
-        if (res.data.status == "ok") {
-          if (res.data.data[0].friends) {
-            var notifs = res.data.data[0].friends.filter(function (s) {
-              var recieve = s.recieved == true;
-              var status = s.status == false;
-              return recieve && status;
-            });
-            // console.log(notifs);
-            setnotification(notifs);
+    setInterval(() => {
+      axios.post('http://localhost:3000/get-notif', myUsername).then(
+        (res) => {
+          if (res.data.status == "ok") {
+            if (res.data.data[0].friends) {
+              var notifs = res.data.data[0].friends.filter(function (s) {
+                var recieve = s.recieved == true;
+                var status = s.status == false;
+                return recieve && status;
+              });
+              // console.log(notifs);
+              setnotification(notifs);
+            }
           }
-        }
-      }
-    )
+        })
+    }, 2000)
   }, []);
 
 
@@ -145,20 +145,21 @@ function Chatpage(props) {
   // Friend list
   const [friendlist, setfriendlist] = useState([]);
   useEffect(() => {
-    axios.post('http://localhost:3000/myFriends', myUsername).then(
-      (res) => {
-        if (res.data.status == "ok") {
-          if (res.data.data[0].friends) {
-            var friends = res.data.data[0].friends.filter(function (s) {
-              var status = s.status == true;
-              return status;
-            });
-            // console.log(friends);
-            setfriendlist(friends);
+    setInterval(() => {
+      axios.post('http://localhost:3000/myFriends', myUsername).then(
+        (res) => {
+          if (res.data.status == "ok") {
+            if (res.data.data[0].friends) {
+              var friends = res.data.data[0].friends.filter(function (s) {
+                var status = s.status == true;
+                return status;
+              });
+              // console.log(friends);
+              setfriendlist(friends);
+            }
           }
-        }
-      }
-    )
+        })
+    }, 2000)
   }, []);
 
 
@@ -187,7 +188,7 @@ function Chatpage(props) {
   const [sortedMergeMessages, setsortedMergeMessages] = useState([]);
   const [messageList, setmessageList] = useState([]);
   const [messageList2, setmessageList2] = useState([]);
-  const [refreshId, setrefreshId] = useState()
+  const [refreshId, setrefreshId] = useState();
 
   function openChat(fData) {
     // console.log(refreshId);
@@ -217,11 +218,13 @@ function Chatpage(props) {
             // console.log(chat2);
             setmessageList2(chat2);
           }
+          else {
+            setmessageList2([]);
+          }
         }
       )
 
       // Show My Messages
-      // console.log(myUsername);
       axios.post('http://localhost:3000/myFriends', myUsername).then(
         (res) => {
           if (res.data.status == "ok") {
@@ -233,6 +236,9 @@ function Chatpage(props) {
               // console.log(chat);
               setmessageList(chat);
             }
+          }
+          else {
+            setmessageList([]);
           }
         }
       )
@@ -251,13 +257,13 @@ function Chatpage(props) {
     setsortedMergeMessages(mergeMessages.sort(msgSort))
     // console.log(sortedMergeMessages);
 
-  }, [messageList.length, messageList2.length])
+  }, [messageList, messageList2])
 
 
-
+  // auto scroll messages
   const messagesEndRef = useRef(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({behavior: 'smooth',inline: 'nearest'});
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
   }, [sortedMergeMessages.length])
 
   // send messages
@@ -277,6 +283,13 @@ function Chatpage(props) {
 
 
 
+  // emoji picker
+  const [showPicker, setShowPicker] = useState(false);
+  const onEmojiClick = (event, emojiObject) => {
+    setmessage(prevInput => prevInput + emojiObject.emoji);
+    setShowPicker(false);
+  };
+
 
 
 
@@ -291,11 +304,10 @@ function Chatpage(props) {
           <div className="container">
             <div className="inside">
               <div className="nav nav-tab menu">
-                {/* <button className="btn"><img className="avatar-xl" src="dist/img/avatars/default.png" alt="avatar" /></button> */}
+
                 <button className="btn"><img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="avatar" /></button>
-                <a href="#members" className="active" data-toggle="tab"><i className="material-icons">account_circle</i></a>
-                {/* <a href="#discussions" data-toggle="tab" className="active"><i className="material-icons active">chat_bubble_outline</i></a> */}
-                <a href="#notifications" data-toggle="tab" className="material-icons"><i className="material-icons">notifications_none</i></a>
+                <a href="#members" className="active" data-toggle="tab"><i className="material-icons">people</i></a>
+                <a href="#notifications" data-toggle="tab"><i className="material-icons">person_add</i></a>
                 <div data-toggle="tab" className="f-grow1"></div>
 
                 {/* <button class="btn mode"><i class="material-icons">brightness_2</i></button> */}
@@ -323,7 +335,7 @@ function Chatpage(props) {
                   </div>
                   <div className="contacts">
                     <h1>Chats</h1>
-                    <div className="list-group" id="contacts" role="tablist">
+                    { friendList.length != 0 && <div className="list-group" id="contacts" role="tablist">
                       {friendList}
                       {/* <a href="#" className="filterMembers all online contact" data-toggle="list">
                       <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
@@ -442,7 +454,10 @@ function Chatpage(props) {
                         <i className="material-icons">person</i>
                       </div>
                     </a> */}
-                    </div>
+                    </div>}
+                    { friendList.length == 0 && <div className="list-group" id="contacts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                      <p style={{ textAlign: "center" }}> Start Chatting to friends by sending them friend requests. ( </p>
+                    </div>}
                   </div>
                 </div>
                 {/* End of Contacts */}
@@ -577,13 +592,13 @@ function Chatpage(props) {
                 <div id="notifications" className="tab-pane fade">
                   <div className="search">
                     <form className="form-inline position-relative">
-                      <input type="search" className="form-control" id="notice" placeholder="Filter notifications..." />
-                      <button type="button" className="btn btn-link loop"><i className="material-icons filter-list">filter_list</i></button>
+                      <input type="search" className="form-control" id="notice" placeholder="Enter Username to add friends..." />
+                      <button type="button" className="btn btn-link loop"><i className="material-icons">person_add</i></button>
                     </form>
                   </div>
                   <div className="notifications">
-                    <h1>Notifications</h1>
-                    <div className="list-group" id="alerts" role="tablist">
+                    <h1>Friend requests</h1>
+                    {mainnotif.length != 0 && <div className="list-group" id="alerts" role="tablist">
                       {mainnotif}
                       {/* <a href="#" className="filterNotifications all latest notification" data-toggle="list">
                       <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
@@ -675,7 +690,12 @@ function Chatpage(props) {
                         <span>Jul 19, 2017</span>
                       </div>
                     </a> */}
-                    </div>
+                    </div>}
+
+                    { mainnotif.length == 0 && <div className="list-group" id="alerts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                      <p style={{ textAlign: "center" }}>No one sends you a friend request :( </p>
+                    </div>}
+
                   </div>
                 </div>
                 {/* End of Notifications */}
@@ -860,7 +880,7 @@ function Chatpage(props) {
             {/* Start of Babble */}
             <div className="babble tab-pane fade active show" id="list-chat" role="tabpanel" aria-labelledby="list-chat-list">
               {/* Start of Chat */}
-              <div className="chat" id="chat1">
+              {chatUsername != '' && <div className="chat" id="chat1">
                 <div className="top">
                   <div className="container">
                     <div className="col-md-12">
@@ -879,12 +899,8 @@ function Chatpage(props) {
                         <div className="dropdown">
                           <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
                           <div className="dropdown-menu dropdown-menu-right">
-                            <button className="dropdown-item connect" name={1}><i className="material-icons">phone_in_talk</i>Voice Call</button>
-                            <button className="dropdown-item connect" name={1}><i className="material-icons">videocam</i>Video Call</button>
-                            <hr />
-                            <button className="dropdown-item"><i className="material-icons">clear</i>Clear History</button>
-                            <button className="dropdown-item"><i className="material-icons">block</i>Block Contact</button>
-                            <button className="dropdown-item"><i className="material-icons">delete</i>Delete Contact</button>
+                            <button className="dropdown-item"><i className="material-icons">delete_forever</i>Clear Chat History</button>
+                            <button className="dropdown-item"><i className="material-icons">remove_circle</i>Unfriend {chatUsername}</button>
                           </div>
                         </div>
                       </div>
@@ -893,31 +909,30 @@ function Chatpage(props) {
                 </div>
                 <div className="content" id="content">
                   <div className="container">
-                    <div className="col-md-12 messages">
+                    {sortedMergeMessages.length != 0 && <div className="col-md-12 messages">
                       {/* <div className="date">
                         <hr />
                         <span>Yesterday</span>
                         <hr />
                       </div> */}
 
-                      {/* <ScrollableFeed> */}
-                        {(() => {
-                          return sortedMergeMessages.map((s) => {
-                            return <div className={s.FriendUsername == myUsername.userUserName ? "message" : "message me"}>
-                              {s.FriendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />}
-                              <div className="text-main">
-                                <div className={s.FriendUsername == myUsername.userUserName ? "text-group" : "text-group me"}>
-                                  <div className={s.FriendUsername == myUsername.userUserName ? "text" : "text me"}>
-                                    <p>{s.Message}</p>
-                                  </div>
+
+                      {(() => {
+                        return sortedMergeMessages.map((s) => {
+                          return <div className={s.FriendUsername == myUsername.userUserName ? "message" : "message me"}>
+                            {s.FriendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />}
+                            <div className="text-main">
+                              <div className={s.FriendUsername == myUsername.userUserName ? "text-group" : "text-group me"}>
+                                <div className={s.FriendUsername == myUsername.userUserName ? "text" : "text me"}>
+                                  <p>{s.Message.split('\n').map(str => <p className='p-0 m-0' style={{ fontSize: '16px', fontWeight: '400', lineHeight: '1.4', minHeight: '18px' }}>{str}</p>)} </p>
                                 </div>
-                                <span>{s.Time}</span>
                               </div>
+                              <span>{s.Time}</span>
                             </div>
-                          })
-                        })()}
-                        <div ref={messagesEndRef}></div>
-                      {/* </ScrollableFeed> */}
+                          </div>
+                        })
+                      })()}
+                      <div ref={messagesEndRef}></div>
 
                       {/* <div className="message">
                         <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
@@ -1033,15 +1048,28 @@ function Chatpage(props) {
                           </div>
                         </div>
                       </div> */}
-                    </div>
+                      <div className="picker-container" style={{ position: 'relative', width: '100%' }}>
+                        {showPicker && <Picker pickerStyle={{ width: '100%', height: '30vh' }} onEmojiClick={onEmojiClick} />}
+                      </div>
+                    </div>}
+                    {sortedMergeMessages.length == 0 && <div className="col-md-12">
+                      <div className="no-messages">
+                        <i className="material-icons md-48">forum</i>
+                        <p>Seems people are shy to start the chat. Break the ice send the first message.</p>
+                      </div>
+                      <div className="picker-container" style={{ position: 'relative', width: '100%' }}>
+                        {showPicker && <Picker pickerStyle={{ width: '100%', height: '30vh' }} onEmojiClick={onEmojiClick} />}
+                      </div>
+                    </div>}
                   </div>
                 </div>
+
                 <div className="container">
                   <div className="col-md-12">
                     <div className="bottom">
                       <div className="position-relative w-100">
                         <textarea name="message" value={message} onChange={(e) => { setValue(e); }} className="form-control" placeholder="Start typing..." rows={1} defaultValue={""} />
-                        <button className="btn emoticons"><i className="material-icons">insert_emoticon</i></button>
+                        <button className="btn emoticons" onClick={() => setShowPicker(val => !val)}><i className="material-icons">insert_emoticon</i></button>
                         <button onClick={() => { sendMessage(chatUsername) }} className="btn send"><i className="material-icons">send</i></button>
                       </div>
                       <label>
@@ -1051,8 +1079,17 @@ function Chatpage(props) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>}
+
               {/* End of Chat */}
+
+              {/* when login ....this div will show on place of chatpage */}
+              {chatUsername == '' && <div className="chat" id="chat1" style={{ height: '100vh', backgroundColor: 'lightgrey', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                <img src="dist\img\homeImg.png" style={{ height: "45vh", width: '22.5vw', }} />
+                <h2 style={{ marginTop: '7vh', color: 'black', fontFamily: "Seoge UI", fontWeight: '300', lineHeight: '36px', fontSize: '36px' }}>Keep your device connected</h2>
+                <p style={{ marginTop: '2vh', color: 'black', width: '38vw', fontFamily: "Seoge UI", fontWeight: '400', lineHeight: '22px', fontSize: '18px', textAlign: 'center' }}>BuddyUp connects to your device to sync messages. To reduce data usage, connect your device to Wi-Fi.</p>
+              </div>}
+
               {/* Start of Call */}
               {/* <div className="call" id="call1">
               <div className="content">
