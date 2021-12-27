@@ -1,0 +1,10 @@
+details > summary {
+    list-style-type: '▼';
+    font-size: 10px;
+}
+
+details[open] > summary {
+    list-style-type: '▲';
+    font-size: 10px;
+}
+

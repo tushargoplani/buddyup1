@@ -93,7 +93,6 @@ app.post('/valid-email', bodyParser.json(), (req, res) => {
     })
 })
 
-
 app.post('/valid-username', bodyParser.json(), (req, res) => {
     var userCollection = connection.db('buddyup').collection('users');
     userCollection.find({ uusername: req.body.uusername }).toArray((err, result) => {
@@ -105,9 +104,8 @@ app.post('/valid-username', bodyParser.json(), (req, res) => {
     })
 })
 
-
 app.post('/check-login', bodyParser.json(), (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     var usercollection = connection.db('buddyup').collection('users');
     usercollection.find({ uusername: req.body.username, upassword: req.body.password }).toArray((err, result) => {
         if (!err && result.length > 0) {
@@ -118,20 +116,18 @@ app.post('/check-login', bodyParser.json(), (req, res) => {
     })
 })
 
-
-
 // for forgot password
 app.post('/user-by-email', bodyParser.json(), (req, res) => {
-    console.log("email check");
-    console.log(req.body.email)
+    // console.log("email check");
+    // console.log(req.body.email)
     var UserCollection = connection.db('buddyup').collection('users');
-    console.log("var email check three" + req.body.email)
+    // console.log("var email check three" + req.body.email)
     UserCollection.find({ uemail: (req.body.email) }).toArray((err, result) => {
-        console.log("updated student two")
+        // console.log("updated student two")
         if (!err && result.length > 0) {
             console.log(result);
             res.send({ status: "ok", data: result })
-            console.log("email is match")
+            // console.log("email is match")
             var n = result.map((e) => { return e.uusername })
             var i = result.map((e) => { return e.upassword })
             sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.email, "Welcome to BuddyUp", "<h3> your buddyup account  password is</h3>" + i + "<h3> your buddyup account  username is </h3>" + n)
@@ -143,9 +139,8 @@ app.post('/user-by-email', bodyParser.json(), (req, res) => {
     })
 })
 
-
 app.post('/update-user', (req, res) => {
-    console.log("103--------------");
+    // console.log("103--------------");
     upload(req, res, (err) => {
         if (err) {
             console.log("Error Occured during upload ");
@@ -156,7 +151,7 @@ app.post('/update-user', (req, res) => {
             console.log("111---------------")
             var userCollection = connection.db('buddyup').collection('users');
             console.log("files", req.files);
-            console.log("line 47");
+            // console.log("line 47");
             console.log(req.body);
 
             userCollection.update({ _id: ObjectId(req.body._id) }, { $set: { profile: req.files.profile[0].filename, uname: req.body.uname, uemail: req.body.uemail, uusername: req.body.uusername, upassword: req.body.upassword } }, (err, result) => {
@@ -171,12 +166,11 @@ app.post('/update-user', (req, res) => {
     });
 })
 
-
 app.post('/add-friend', bodyParser.json(), (req, res) => {
 
     const collection = connection.db('buddyup').collection('users');
     var friend = req.body.friend;
-    console.log(friend);
+    // console.log(friend);
     var myUsername = req.body.userUserName;
     console.log(myUsername);
     console.log(req.body);
@@ -192,7 +186,6 @@ app.post('/add-friend', bodyParser.json(), (req, res) => {
         })
 });
 
-
 app.post('/get-notif', bodyParser.json(), (req, res) => {
     // console.log(req.body);
     const collection = connection.db('buddyup').collection('users');
@@ -206,13 +199,25 @@ app.post('/get-notif', bodyParser.json(), (req, res) => {
     })
 });
 
+app.post('/get-userlist', bodyParser.json(), (req, res) => {
+    // console.log(req.body);
+    const collection = connection.db('buddyup').collection('users');
+    collection.find({ uusername: (req.body.S) }).toArray((err, docs) => {
+        if (!err) {
+            res.send({ status: "ok", data: docs });
+        }
+        else {
+            res.send({ status: "failed", data: "some error occured" });
+        }
+    })
+});
 
 app.post('/accept-request', bodyParser.json(), (req, res) => {
 
     const collection = connection.db('buddyup').collection('users');
     var friend = req.body.friendReq;
     var username = req.body.userUserName;
-    console.log(friend); console.log(username);
+    // console.log(friend); console.log(username);
     collection.updateOne({ "uusername": username, "friends": { $elemMatch: { "name": friend } } }, { $set: { "friends.$.status": true } })
     collection.updateOne({ "uusername": friend, "friends": { $elemMatch: { "name": username } } }, { $set: { "friends.$.status": true } }
         , (err, result) => {
@@ -226,6 +231,22 @@ app.post('/accept-request', bodyParser.json(), (req, res) => {
 
 });
 
+app.post('/unfriend-or-decline', bodyParser.json(), (req, res) => {
+    const collection = connection.db('buddyup').collection('users');
+    console.log(req.body);
+    // collection.deleteOne({"friends.$.name": (req.body.frnd) , uusername: (req.body.mine)});
+    // collection.deleteOne({"friends.$.name": (req.body.mine) , uusername: (req.body.frnd)}
+    collection.updateOne({ "uusername": req.body.mine, "friends": { $elemMatch: { "name": req.body.frnd } } }, { $set: { "friends.$.name": "", "friends.$.status": false, "friends.$.recieved": false, "friends.$.sent": false } })
+    collection.updateOne({ "uusername": req.body.frnd, "friends": { $elemMatch: { "name": req.body.mine } } }, { $set: { "friends.$.name": "", "friends.$.status": false, "friends.$.recieved": false, "friends.$.sent": false } }
+        , (err, result) => {
+            if (!err) {
+                res.send({ status: "ok", data: "friend unfriend or request declined" });
+            }
+            else {
+                res.send({ status: "failed", data: "some error occured" });
+            }
+        })
+});
 
 app.post('/myFriends', bodyParser.json(), (req, res) => {
     // console.log(req.body);
@@ -239,6 +260,7 @@ app.post('/myFriends', bodyParser.json(), (req, res) => {
         }
     })
 });
+
 app.post('/friendData', bodyParser.json(), (req, res) => {
     // console.log("friend data = " + req.query.id);
     const collection = connection.db('buddyup').collection('users');
@@ -252,22 +274,76 @@ app.post('/friendData', bodyParser.json(), (req, res) => {
     })
 });
 
-
 app.post('/send-message', bodyParser.json(), (req, res) => {
-
-    const collection = connection.db('buddyup').collection('users');
-    console.log(req.body);
-    collection.updateOne({ 'uusername': req.body.userUserName }, { $push: { chats: { FriendUsername: req.body.friendUsername, Message: req.body.message, MessageId: req.body.messageid, Time: req.body.time, Date: req.body.date, DateTime: req.body.dateTime } } }
-        , (err, result) => {
-            if (!err) {
-                res.send({ status: "ok", data: "Message Sent" });
-            }
-            else {
-                res.send({ status: "failed", data: "some error occured" });
-            }
-        })
+    const collection = connection.db('buddyup').collection('messages');
+    collection.insertOne(req.body , (err, result) => {
+        if (!err) {
+            res.send({ status: "ok", data: "Message Sent" });
+        }
+        else {
+            res.send({ status: "failed", data: "some error occured" });
+        }
+    })
 });
 
+// for retrieving messages
+app.post('/messages1', bodyParser.json(), (req, res) => {
+    // console.log(req.body);
+    const collection = connection.db('buddyup').collection('messages');
+    collection.find({ userUserName: (req.body.userUserName) }).toArray((err, docs) => {
+        if (!err) {
+            res.send({ status: "ok", data: docs });
+        }
+        else {
+            res.send({ status: "failed", data: "some error occured" });
+        }
+    })
+});
+
+// for retrieving messages
+app.post('/messages2', bodyParser.json(), (req, res) => {
+    // console.log(req.body);
+    const collection2 = connection.db('buddyup').collection('messages');
+    collection2.find({ userUserName: (req.body.fData) }).toArray((err, docs) => {
+        if (!err) {
+            res.send({ status: "ok", data: docs });
+        }
+        else {
+            res.send({ status: "failed", data: "some error occured" });
+        }
+    })
+});
+
+// for delete a messages
+app.post('/delete-a-message', bodyParser.json(), (req, res) => {
+    const collection = connection.db('buddyup').collection('messages');
+    // console.log(req.body.id);
+    collection.deleteOne({messageid: (req.body.id)},(err,result)=>
+    {
+        if(!err){
+            res.send({status:"OK" , data:"Message Deleted successfully"})
+        }
+        else{
+            res.send({status:"Failed" , data:err})
+        }
+    })
+});
+
+// delete all msg between two persons
+app.post('/delete-all-message', bodyParser.json(), (req, res) => {
+    const collection = connection.db('buddyup').collection('messages');
+    // console.log(req.body);
+    collection.deleteMany({userUserName: (req.body.frnd) , friendUsername: (req.body.mine)})
+    collection.deleteMany({userUserName: (req.body.mine) , friendUsername: (req.body.frnd)},(err,result)=>
+    {
+        if(!err){
+            res.send({status:"OK" , data:"All Messages Deleted"})
+        }
+        else{
+            res.send({status:"Failed" , data:err})
+        }
+    })
+});
 
 
 

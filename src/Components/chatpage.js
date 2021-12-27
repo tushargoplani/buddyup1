@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import Picker from 'emoji-picker-react';
-
+import './css/chatpage.css';
 
 function Chatpage(props) {
 
@@ -77,22 +77,45 @@ function Chatpage(props) {
 
 
   function addFriend() {
-    console.log(friend);
-    console.log(userUserName);
+    // console.log(friend);
+    // console.log(userUserName);
     var addfrnd = { friend, userUserName };
-    console.log(addfrnd);
+    // console.log(addfrnd);
+    if(friend!=userUserName){
     axios.post('http://localhost:3000/add-friend', addfrnd).then((res) => {
       alert(res.data.data);
+      setfriend('');
     })
+  }
+  else{
+    alert("You can't send you a request. 🥱");
+  }
   }
 
   function accept(friendReq) {
-    console.log(friendReq);
+    // console.log(friendReq);
     var acceptFrnd = { friendReq, userUserName };
-    console.log(acceptFrnd);
+    // console.log(acceptFrnd);
     axios.post('http://localhost:3000/accept-request', acceptFrnd).then((res) => {
       if (res.data.status == "ok") {
         alert(res.data.data);
+      }
+    });
+  }
+
+  function decline(mine,frnd) {
+    axios.post('http://localhost:3000/unfriend-or-decline', {mine,frnd}).then((res) => {
+      if (res.data.status == "ok") {
+        alert(res.data.data);
+      }
+    });
+  }
+
+  function unfriend(mine,frnd) {
+    axios.post('http://localhost:3000/unfriend-or-decline', {mine,frnd}).then((res) => {
+      if (res.data.status == "ok") {
+        alert(res.data.data);
+        setchatUsername('');
       }
     });
   }
@@ -132,7 +155,7 @@ function Chatpage(props) {
       <div className="data">
         <p>{S.name}, has sent you a friend request.</p>
         <button class="btn button col-sm-5 py-2" onClick={() => { accept(S.name) }} >Accept</button> &nbsp; &nbsp;
-        <button class="btn button col-sm-5 py-2" >Decline</button>
+        <button class="btn button col-sm-5 py-2" onClick={() => { decline(myUsername.userUserName,S.name) }} >Decline</button>
       </div>
     </a>
   });
@@ -191,6 +214,7 @@ function Chatpage(props) {
   const [refreshId, setrefreshId] = useState();
 
   function openChat(fData) {
+    setmessage('');
     // console.log(refreshId);
     clearInterval(refreshId);
     axios.post('http://localhost:3000/friendData/?id=' + fData).then(
@@ -207,12 +231,11 @@ function Chatpage(props) {
 
     setrefreshId(setInterval(() => {
       // show friend msg
-      axios.post('http://localhost:3000/friendData/?id=' + fData).then(
+      axios.post('http://localhost:3000/messages2', { fData }).then(
         (res) => {
-          if (res.data.data[0].chats) {
-            var chat2 = res.data.data[0].chats.filter(function (s) {
-              var friend2 = s.FriendUsername === myUsername.userUserName;
-              // console.log(myUsername.userUserName);
+          if (res.data.status == "ok") {
+            var chat2 = res.data.data.filter(function (s) {
+              var friend2 = s.friendUsername === myUsername.userUserName;
               return friend2;
             });
             // console.log(chat2);
@@ -225,17 +248,15 @@ function Chatpage(props) {
       )
 
       // Show My Messages
-      axios.post('http://localhost:3000/myFriends', myUsername).then(
+      axios.post('http://localhost:3000/messages1', myUsername).then(
         (res) => {
           if (res.data.status == "ok") {
-            if (res.data.data[0].chats) {
-              var chat = res.data.data[0].chats.filter(function (s) {
-                var friend = s.FriendUsername === fData;
-                return friend;
-              });
-              // console.log(chat);
-              setmessageList(chat);
-            }
+            var chat = res.data.data.filter(function (s) {
+              var friend = s.friendUsername === fData;
+              return friend;
+            });
+            // console.log(chat);
+            setmessageList(chat);
           }
           else {
             setmessageList([]);
@@ -249,12 +270,12 @@ function Chatpage(props) {
   useEffect(() => {
     var mergeMessages = [...messageList2, ...messageList];
     // console.log(mergeMessages);
-    function msgSort(a, b) {
-      var frst = new Date(a.DateTime);
-      var scnd = new Date(b.DateTime);
+    function msgSort(a,b){
+      var frst = new Date(a.dateTime);
+      var scnd = new Date(b.dateTime);
       return frst - scnd;
     }
-    setsortedMergeMessages(mergeMessages.sort(msgSort))
+    setsortedMergeMessages(mergeMessages.sort(msgSort));
     // console.log(sortedMergeMessages);
 
   }, [messageList, messageList2])
@@ -268,19 +289,20 @@ function Chatpage(props) {
 
   // send messages
   function sendMessage(friendUsername) {
-    var today = new Date();
-    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    var dateTime = date + ' ' + time;
-    var messageid = Math.random();
+    if (message != '') {
+      var today = new Date();
+      var date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+      var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+      var dateTime = today;
+      var messageid = Math.random();
 
-    var sendMessage = { userUserName, friendUsername, message, time, date, dateTime, messageid };
-    axios.post('http://localhost:3000/send-message', sendMessage).then((res) => {
-      // alert(res.data.data);
-    })
-    setmessage('');
+      var sendMessage = { userUserName, friendUsername, message, time, date, dateTime, messageid };
+      axios.post('http://localhost:3000/send-message', sendMessage).then((res) => {
+        // alert(res.data.data);
+      })
+      setmessage('');
+    }
   }
-
 
 
   // emoji picker
@@ -291,7 +313,21 @@ function Chatpage(props) {
   };
 
 
+  // delete a message
+  function deleteMsg(id) {
+    axios.post('http://localhost:3000/delete-a-message', {id}).then(
+      (res) => {
+        alert(res.data.data);
+      })
+  }
 
+// delete chat history
+function deleteHistory(mine,frnd){
+  axios.post('http://localhost:3000/delete-all-message', {mine,frnd}).then(
+      (res) => {
+        alert(res.data.data);
+      })
+}
 
 
 
@@ -335,7 +371,7 @@ function Chatpage(props) {
                   </div>
                   <div className="contacts">
                     <h1>Chats</h1>
-                    { friendList.length != 0 && <div className="list-group" id="contacts" role="tablist">
+                    {friendList.length != 0 && <div className="list-group" id="contacts" role="tablist">
                       {friendList}
                       {/* <a href="#" className="filterMembers all online contact" data-toggle="list">
                       <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
@@ -455,8 +491,8 @@ function Chatpage(props) {
                       </div>
                     </a> */}
                     </div>}
-                    { friendList.length == 0 && <div className="list-group" id="contacts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-                      <p style={{ textAlign: "center" }}> Start Chatting to friends by sending them friend requests. ( </p>
+                    {friendList.length == 0 && <div className="list-group" id="contacts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                      <p style={{ textAlign: "center" }}> Start Chatting to friends by sending them friend requests. </p>
                     </div>}
                   </div>
                 </div>
@@ -692,7 +728,7 @@ function Chatpage(props) {
                     </a> */}
                     </div>}
 
-                    { mainnotif.length == 0 && <div className="list-group" id="alerts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                    {mainnotif.length == 0 && <div className="list-group" id="alerts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
                       <p style={{ textAlign: "center" }}>No one sends you a friend request :( </p>
                     </div>}
 
@@ -899,8 +935,8 @@ function Chatpage(props) {
                         <div className="dropdown">
                           <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
                           <div className="dropdown-menu dropdown-menu-right">
-                            <button className="dropdown-item"><i className="material-icons">delete_forever</i>Clear Chat History</button>
-                            <button className="dropdown-item"><i className="material-icons">remove_circle</i>Unfriend {chatUsername}</button>
+                            <button onClick={()=>{deleteHistory(myUsername.userUserName,chatUsername)}} className="dropdown-item"><i className="material-icons">delete_forever</i>Clear Chat History</button>
+                            <button onClick={()=>{unfriend(myUsername.userUserName,chatUsername)}} className="dropdown-item"><i className="material-icons">remove_circle</i>Unfriend {chatUsername}</button>
                           </div>
                         </div>
                       </div>
@@ -909,6 +945,7 @@ function Chatpage(props) {
                 </div>
                 <div className="content" id="content">
                   <div className="container">
+
                     {sortedMergeMessages.length != 0 && <div className="col-md-12 messages">
                       {/* <div className="date">
                         <hr />
@@ -916,18 +953,42 @@ function Chatpage(props) {
                         <hr />
                       </div> */}
 
+                      {/* <div className='message'>
+                    <div id="popup1" class="overlay">
+                      <div class="popup">
+                        <h2>Here i am</h2>
+                        <a class="close" href="#">&times;</a>
+                        <div class="content">
+                          Thank to pop me out of that button, but now i'm done so you can close this window.
+                        </div>
+                      </div>
+                    </div>
+                    </div> */}
+
 
                       {(() => {
                         return sortedMergeMessages.map((s) => {
-                          return <div className={s.FriendUsername == myUsername.userUserName ? "message" : "message me"}>
-                            {s.FriendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />}
+                          return <div className={s.friendUsername == myUsername.userUserName ? "message" : "message me"}>
+                            {s.friendUsername == myUsername.userUserName && <img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" alt="avatar" />}
                             <div className="text-main">
-                              <div className={s.FriendUsername == myUsername.userUserName ? "text-group" : "text-group me"}>
-                                <div className={s.FriendUsername == myUsername.userUserName ? "text" : "text me"}>
-                                  <p>{s.Message.split('\n').map(str => <p className='p-0 m-0' style={{ fontSize: '16px', fontWeight: '400', lineHeight: '1.4', minHeight: '18px' }}>{str}</p>)} </p>
+                              <div className={s.friendUsername == myUsername.userUserName ? "text-group" : "text-group me"}>
+                                <div style={{ position: "relative" }} className={s.friendUsername == myUsername.userUserName ? "text" : "text me"}>
+                                  <p>
+                                    {myUsername.userUserName == s.friendUsername && <span style={{ fontSize: '10px' }}>{s.date}</span>}
+                                    {myUsername.userUserName != s.friendUsername && <details>
+                                      <summary> {s.date}</summary>
+                                      <p>
+                                        <button onClick={() => { deleteMsg(s.messageid) }} class="btn button col-sm-5 py-2 text-primary bg-white" style={{ minWidth: '60px' }}>Delete</button>
+                                      </p>
+                                    </details>}
+                                    {/* <i style={{ height: '15px', width: '15px', display: "inline-block", position: "absolute", top: "-1px", right: '7px' }} className='material-icons'> expand_more </i> */}
+                                    {s.message.split('\n').map(str => <p className='p-0 m-0' style={{ fontSize: '16px', fontWeight: '400', lineHeight: '1.4', minHeight: '18px' }}>
+                                      {str}
+                                    </p>)}
+                                  </p>
                                 </div>
                               </div>
-                              <span>{s.Time}</span>
+                              <span>{s.time}</span>
                             </div>
                           </div>
                         })
