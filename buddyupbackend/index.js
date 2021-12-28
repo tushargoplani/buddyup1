@@ -104,6 +104,12 @@ app.post('/valid-username', bodyParser.json(), (req, res) => {
     })
 })
 
+app.post("/send-user-otp",bodyParser.json(),(req,res)=>{
+    console.log(req.body);
+    sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.uemail, "Welcome to BuddyUp", `Your One Time Password is - <h3>${req.body.otp}</h3><br><h6>We hope you find our service cool.</h6>`)
+    res.send({status:"ok",data:"please verify your email"});
+})
+
 app.post('/check-login', bodyParser.json(), (req, res) => {
     // console.log(req.body);
     var usercollection = connection.db('buddyup').collection('users');

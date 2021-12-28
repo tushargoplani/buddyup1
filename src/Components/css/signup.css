@@ -136,6 +136,18 @@
       #login i{
         font-size: 20px;
       }
+      #createotp{
+        width: 90%;
+      }
+      #createotp form input{
+        height: 15%;
+      }
+      #createotp form button{
+        height: 15%;
+      }
+      #createotp i{
+        font-size: 20px;
+      }
       #createact{
       margin-top: 0px;
     }
@@ -152,9 +164,64 @@
         margin-top: 3.5%;
         margin-left: 2.5%;
       }
+      #createotp form input{
+        padding-left: 12%;
+        width: 100%;
+      }
+      #createotp form button{
+        width: 100%;
+      }
+      #createotp i{
+        margin-top: 3.5%;
+        margin-left: 2.5%;
+      }
     }
 
 
 .lowercase{
   text-transform: lowercase;
+}
+
+
+/* otp div */
+#createotp{
+  width: 80%;
+  /* height: 600px; */
+  display: none;
+  position: relative;
+}
+#createotp h2{
+  text-align: center;
+  margin-top: 30px;
+}
+#createotp form{
+  text-align: center;
+  margin-top: 50px;
+  /* height: 60%; */
+}
+#createotp form input{
+  width: 80%;
+  height: 64.8px;
+  font-size: 20px;
+  background-color: lightgrey;
+  border: none;
+  outline: none;
+  border-radius: 30px;
+  padding-left: 8%;
+}
+#createotp form button{
+  width: 80%;
+  height: 64.8px;
+  font-size: 20px;
+  background-color: black;
+  color: white;
+  border: none;
+  outline: none;
+  border-radius: 30px;
+}
+#createotp i{
+  position: absolute;
+  font-size: 25px;
+  margin-top: 2.3%;
+  margin-left: 1.5%;
 }

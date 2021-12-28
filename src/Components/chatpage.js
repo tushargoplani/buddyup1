@@ -148,10 +148,10 @@ function Chatpage(props) {
 
   var mainnotif = notification.map((S) => {
     return <a key={S.name} href="#" className="filterNotifications all latest notification" data-toggle="list">
-      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-      <div className="status">
+      <img className="avatar-md" src="dist/img/avatars/default.png" data-toggle="tooltip" data-placement="top" alt="avatar" />
+      {/* <div className="status">
         <i className="material-icons online">fiber_manual_record</i>
-      </div>
+      </div> */}
       <div className="data">
         <p>{S.name}, has sent you a friend request.</p>
         <button class="btn button col-sm-5 py-2" onClick={() => { accept(S.name) }} >Accept</button> &nbsp; &nbsp;
@@ -188,13 +188,10 @@ function Chatpage(props) {
 
   var friendList = friendlist.map((S) => {
     return <div onClick={() => { openChat(S.name) }} className="filterMembers all online contact" data-toggle="list" style={{ cursor: "pointer" }}>
-      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-      <div className="status">
-        <i className="material-icons online">fiber_manual_record</i>
-      </div>
+      <img className="avatar-md" src="dist/img/avatars/default.png" data-toggle="tooltip" data-placement="top" title={S.name} alt="avatar" />
       <div className="data">
         <h5>{S.name}</h5>
-        <p>will show last message</p>
+        {/* <p>will show last message</p> */}
       </div>
       <div className="person-add">
         <i className="material-icons">person</i>
@@ -765,7 +762,7 @@ function deleteHistory(mine,frnd){
                                   <img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="image" />
                                   <label>
                                     <input type="file" onChange={(e) => { setProfile(e) }} />
-                                    <span className="btn button">Upload avatar</span>  {uploadPercentage} %uploaded
+                                    <span className="btn button">Upload avatar</span>  {/* {uploadPercentage} %uploaded */}
                                   </label>
                                 </div>
                                 <p>For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
@@ -776,10 +773,10 @@ function deleteHistory(mine,frnd){
                                   <label htmlFor="Name">Name <span>*</span></label>
                                   <input type="text" name="Uname" value={uname} onChange={(e) => { setValue(e) }} className="form-control" id="Name" placeholder="Name" required />
                                 </div>
-                                <div className="field">
+                                {/* <div className="field">
                                   <label htmlFor="username">username<span>*</span></label>
                                   <input type="text" name="Uusername" value={uusername} onChange={(e) => { setValue(e) }} className="form-control" id="username" placeholder="username" required />
-                                </div>
+                                </div> */}
                               </div>
                               <div className="field">
                                 <label htmlFor="email">Email <span>*</span></label>
@@ -922,9 +919,9 @@ function deleteHistory(mine,frnd){
                     <div className="col-md-12">
                       <div className="inside">
                         <a href="#"><img className="avatar-md" src={chatProfile ? `http://localhost:3000/${chatProfile}` : "dist/img/avatars/default.png"} data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" /></a>
-                        <div className="status">
+                        {/* <div className="status">
                           <i className="material-icons online">fiber_manual_record</i>
-                        </div>
+                        </div> */}
                         <div className="data">
                           <h5><a href="#">{chatName}</a></h5>
                           <span>{chatUsername}</span>
