@@ -104,10 +104,10 @@ app.post('/valid-username', bodyParser.json(), (req, res) => {
     })
 })
 
-app.post("/send-user-otp",bodyParser.json(),(req,res)=>{
+app.post("/send-user-otp", bodyParser.json(), (req, res) => {
     console.log(req.body);
     sendMail("buddyup28@gmail.com", "kviuqosaxagajcdi", req.body.uemail, "Welcome to BuddyUp", `Your One Time Password is - <h3>${req.body.otp}</h3><br><h6>We hope you find our service cool.</h6>`)
-    res.send({status:"ok",data:"please verify your email"});
+    res.send({ status: "ok", data: "please verify your email" });
 })
 
 app.post('/check-login', bodyParser.json(), (req, res) => {
@@ -145,8 +145,60 @@ app.post('/user-by-email', bodyParser.json(), (req, res) => {
     })
 })
 
-app.post('/update-user', (req, res) => {
-    // console.log("103--------------");
+// app.post('/update-user', (req, res) => {
+//     // console.log("103--------------");
+//     upload(req, res, (err) => {
+//         if (err) {
+//             console.log("Error Occured during upload ");
+//             console.log(err);
+//             res.send({ status: "failed", data: err });
+//         }
+//         else {
+//             console.log("111---------------")
+//             var userCollection = connection.db('buddyup').collection('users');
+//             console.log("files", req.files);
+//             // console.log("line 47");
+//             console.log(req.body);
+
+//             userCollection.update({ _id: ObjectId(req.body._id) }, { $set: { profile: req.files.profile[0].filename, uname: req.body.uname, uemail: req.body.uemail, uusername: req.body.uusername, upassword: req.body.upassword } }, (err, result) => {
+//                 if (!err) {
+//                     res.send({ status: "success", data: "user details updated sucessfully" });
+//                 }
+//                 else {
+//                     res.send({ status: "failed", data: err });
+//                 }
+//             })
+//         }
+//     });
+// })
+
+app.post('/update-user', bodyParser.json(), (req, res) => {
+    var userCollection = connection.db('buddyup').collection('users');
+    // console.log(req.body);
+    userCollection.update({ _id: ObjectId(req.body.userId) }, { $set: { uname: req.body.uname, uemail: req.body.uemail } }, (err, result) => {
+        if (!err) {
+            res.send({ status: "success", data: "user details updated sucessfully" });
+        }
+        else {
+            res.send({ status: "failed", data: err });
+        }
+    })
+})
+
+app.post('/update-password', bodyParser.json(), (req, res) => {
+    var userCollection = connection.db('buddyup').collection('users');
+    // console.log(req.body);
+    userCollection.updateOne({ _id: ObjectId(req.body.userId) }, { $set: { upassword: req.body.reenternewpassword } }, (err, result) => {
+        if (!err) {
+            res.send({ status: "success", data: "Password updated sucessfully" });
+        }
+        else {
+            res.send({ status: "failed", data: err });
+        }
+    })
+})
+
+app.post('/update-profile', (req, res) => {
     upload(req, res, (err) => {
         if (err) {
             console.log("Error Occured during upload ");
@@ -154,22 +206,20 @@ app.post('/update-user', (req, res) => {
             res.send({ status: "failed", data: err });
         }
         else {
-            console.log("111---------------")
             var userCollection = connection.db('buddyup').collection('users');
-            console.log("files", req.files);
-            // console.log("line 47");
-            console.log(req.body);
-
-            userCollection.update({ _id: ObjectId(req.body._id) }, { $set: { profile: req.files.profile[0].filename, uname: req.body.uname, uemail: req.body.uemail, uusername: req.body.uusername, upassword: req.body.upassword } }, (err, result) => {
+            console.log(req.files);
+            // console.log(req.files.profile[0].filename);
+            // console.log(req.body._id);
+            userCollection.update({ _id: ObjectId(req.body._id) }, { $set: { profile: req.files.profile[0].filename } }, (err, result) => {
                 if (!err) {
-                    res.send({ status: "success", data: "user details updated sucessfully" });
+                    res.send({ status: "success", data: "Profile updated sucessfully" });
                 }
                 else {
                     res.send({ status: "failed", data: err });
                 }
             })
         }
-    });
+    })
 })
 
 app.post('/add-friend', bodyParser.json(), (req, res) => {
@@ -282,7 +332,7 @@ app.post('/friendData', bodyParser.json(), (req, res) => {
 
 app.post('/send-message', bodyParser.json(), (req, res) => {
     const collection = connection.db('buddyup').collection('messages');
-    collection.insertOne(req.body , (err, result) => {
+    collection.insertOne(req.body, (err, result) => {
         if (!err) {
             res.send({ status: "ok", data: "Message Sent" });
         }
@@ -324,13 +374,12 @@ app.post('/messages2', bodyParser.json(), (req, res) => {
 app.post('/delete-a-message', bodyParser.json(), (req, res) => {
     const collection = connection.db('buddyup').collection('messages');
     // console.log(req.body.id);
-    collection.deleteOne({messageid: (req.body.id)},(err,result)=>
-    {
-        if(!err){
-            res.send({status:"OK" , data:"Message Deleted successfully"})
+    collection.deleteOne({ messageid: (req.body.id) }, (err, result) => {
+        if (!err) {
+            res.send({ status: "OK", data: "Message Deleted successfully" })
         }
-        else{
-            res.send({status:"Failed" , data:err})
+        else {
+            res.send({ status: "Failed", data: err })
         }
     })
 });
@@ -339,14 +388,13 @@ app.post('/delete-a-message', bodyParser.json(), (req, res) => {
 app.post('/delete-all-message', bodyParser.json(), (req, res) => {
     const collection = connection.db('buddyup').collection('messages');
     // console.log(req.body);
-    collection.deleteMany({userUserName: (req.body.frnd) , friendUsername: (req.body.mine)})
-    collection.deleteMany({userUserName: (req.body.mine) , friendUsername: (req.body.frnd)},(err,result)=>
-    {
-        if(!err){
-            res.send({status:"OK" , data:"All Messages Deleted"})
+    collection.deleteMany({ userUserName: (req.body.frnd), friendUsername: (req.body.mine) })
+    collection.deleteMany({ userUserName: (req.body.mine), friendUsername: (req.body.frnd) }, (err, result) => {
+        if (!err) {
+            res.send({ status: "OK", data: "All Messages Deleted" })
         }
-        else{
-            res.send({status:"Failed" , data:err})
+        else {
+            res.send({ status: "Failed", data: err })
         }
     })
 });

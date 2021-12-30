@@ -22,9 +22,12 @@ function Chatpage(props) {
 
   const [uname, setuname] = useState(userName);
   const [uemail, setuemail] = useState(userEmail);
-  const [upassword, setupassword] = useState(userPassword);
+  const [oldpassword, setoldpassword] = useState("");
+  const [newpassword, setnewpassword] = useState("");
+  const [reenternewpassword, setreenternewpassword] = useState("");
   const [uusername, setuusername] = useState(userUserName);
   const [friend, setfriend] = useState("");
+  // const [profile, setprofile] = useState("");
   var profile;
 
   const [uploadPercentage, setuploadPercentage] = useState("");
@@ -33,11 +36,14 @@ function Chatpage(props) {
   function setValue(e) {
     e.target.name === "Uname" && setuname(e.target.value);
     e.target.name === "Uemail" && setuemail(e.target.value);
-    e.target.name === "Upassword" && setupassword(e.target.value);
+    e.target.name === "oldpassword" && setoldpassword(e.target.value);
+    e.target.name === "newpassword" && setnewpassword(e.target.value);
+    e.target.name === "re-enter-new-password" && setreenternewpassword(e.target.value);
     e.target.name === "Uusername" && setuusername(e.target.value);
     e.target.name === "friend" && setfriend(e.target.value);
     e.target.name === "message" && setmessage(e.target.value);
   }
+
 
   function setProfile(e) {
     profile = e.target.files[0];
@@ -46,50 +52,115 @@ function Chatpage(props) {
 
 
 
-  function updateDetails() {
-
-    var formData = new FormData();
-    formData.append("_id", userId);
-    formData.append("uname", uname)
-    formData.append("uemail", uemail)
-    formData.append("uusername", uusername)
-    formData.append("upassword", upassword);
-    formData.append("profile", profile);
-    console.log(profile);
-    axios.post('http://localhost:3000/update-user', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: function (progressEvent) {
-        console.log("file Uploading Progresss.......");
-        console.log(progressEvent);
-        setuploadPercentage(parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100)));
-        //   setfileInProgress(progressEvent.fileName)
-      }
-    }).then((res) => {
-      alert(res);
-    }).catch(res => {
-      alert("sorry you are not authorised to do this action");
-    });
-
+  function updateProfile() {
+    if (profile != undefined) {
+      var formData = new FormData();
+      formData.append("_id", userId);
+      formData.append("profile", profile);
+      console.log(profile);
+      axios.post('http://localhost:3000/update-profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: function (progressEvent) {
+          console.log("file Uploading Progresss.......");
+          console.log(progressEvent);
+          setuploadPercentage(parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100)));
+          //   setfileInProgress(progressEvent.fileName)
+        }
+      }).then((res) => {
+        alert(res.data.data);
+      }).catch(res => {
+        alert("Some issue occur while updating your profile");
+      });
+    }
+    else {
+      console.log("please choose profile");
+    }
   }
 
+  // function setProfile(e) {
+  //   // setprofile(e.target.files[0])
+  //   profile = e.target.files[0];
+  //   console.log(profile + userId);
+  //   var abc = { profile, userId };
+  //   console.log(abc);
+  //   axios.post('http://localhost:3000/update-profile', abc).then((res) => {
+  //     alert(res.data.data);
+  //   }).catch(res => {
+  //     alert("pic not updated :(");
+  //   })
+  // }
 
+  // function updateProfile() {
+  //   // var formData = new FormData();
+  //   // formData.append("profile", profile);
+  //   // formData.append("_id", userId);
+  //   console.log(profile);
+  //   // var formData = {profile,userId};
+  //   // console.log(formData);
+  //   // console.log(profile);
+  //   // axios.post('http://localhost:3000/update-profile', formData).then((res) => {
+  //   //   alert(res.data.data);
+  //   // }).catch(res => {
+  //   //   alert("pic not updated :(");
+  //   // })
+  //   // axios.post('http://localhost:3000/update-profile', formData,{
+  //   //  headers: {
+  //   //       'Content-Type': 'multipart/form-data'
+  //   //     }
+  //   //   }).then((res) => {
+  //   //   alert(res.data.data);
+  //   // }).catch(res => {
+  //   //   alert("Profile pic not updated :( ");
+  //   // })
+  // }
+
+
+  function updateDetails() {
+    var updateUserDetails = { userId, uname, uemail };
+    axios.post('http://localhost:3000/update-user', updateUserDetails).then((res) => {
+      alert(res.data.data);
+    }).catch(res => {
+      alert("Edit not saved :(");
+    })
+  }
+
+  function changePassword() {
+    if (userPassword == oldpassword) {
+      if (newpassword == reenternewpassword) {
+        axios.post('http://localhost:3000/update-password', { userId, reenternewpassword }).then((res) => {
+          alert(res.data.data);
+          setoldpassword('');
+          setnewpassword('');
+          setreenternewpassword('');
+        }).catch(res => {
+          alert("Password not changed :( ");
+        })
+      }
+      else {
+        alert("New password not match with re-enter new password")
+      }
+    }
+    else {
+      alert("Old password is incorrect")
+    }
+  }
 
   function addFriend() {
     // console.log(friend);
     // console.log(userUserName);
     var addfrnd = { friend, userUserName };
     // console.log(addfrnd);
-    if(friend!=userUserName){
-    axios.post('http://localhost:3000/add-friend', addfrnd).then((res) => {
-      alert(res.data.data);
-      setfriend('');
-    })
-  }
-  else{
-    alert("You can't send you a request. 🥱");
-  }
+    if (friend != userUserName) {
+      axios.post('http://localhost:3000/add-friend', addfrnd).then((res) => {
+        alert(res.data.data);
+        setfriend('');
+      })
+    }
+    else {
+      alert("You can't send you a request. 🥱");
+    }
   }
 
   function accept(friendReq) {
@@ -103,16 +174,16 @@ function Chatpage(props) {
     });
   }
 
-  function decline(mine,frnd) {
-    axios.post('http://localhost:3000/unfriend-or-decline', {mine,frnd}).then((res) => {
+  function decline(mine, frnd) {
+    axios.post('http://localhost:3000/unfriend-or-decline', { mine, frnd }).then((res) => {
       if (res.data.status == "ok") {
         alert(res.data.data);
       }
     });
   }
 
-  function unfriend(mine,frnd) {
-    axios.post('http://localhost:3000/unfriend-or-decline', {mine,frnd}).then((res) => {
+  function unfriend(mine, frnd) {
+    axios.post('http://localhost:3000/unfriend-or-decline', { mine, frnd }).then((res) => {
       if (res.data.status == "ok") {
         alert(res.data.data);
         setchatUsername('');
@@ -155,7 +226,7 @@ function Chatpage(props) {
       <div className="data">
         <p>{S.name}, has sent you a friend request.</p>
         <button class="btn button col-sm-5 py-2" onClick={() => { accept(S.name) }} >Accept</button> &nbsp; &nbsp;
-        <button class="btn button col-sm-5 py-2" onClick={() => { decline(myUsername.userUserName,S.name) }} >Decline</button>
+        <button class="btn button col-sm-5 py-2" onClick={() => { decline(myUsername.userUserName, S.name) }} >Decline</button>
       </div>
     </a>
   });
@@ -267,7 +338,7 @@ function Chatpage(props) {
   useEffect(() => {
     var mergeMessages = [...messageList2, ...messageList];
     // console.log(mergeMessages);
-    function msgSort(a,b){
+    function msgSort(a, b) {
       var frst = new Date(a.dateTime);
       var scnd = new Date(b.dateTime);
       return frst - scnd;
@@ -312,19 +383,19 @@ function Chatpage(props) {
 
   // delete a message
   function deleteMsg(id) {
-    axios.post('http://localhost:3000/delete-a-message', {id}).then(
+    axios.post('http://localhost:3000/delete-a-message', { id }).then(
       (res) => {
         alert(res.data.data);
       })
   }
 
-// delete chat history
-function deleteHistory(mine,frnd){
-  axios.post('http://localhost:3000/delete-all-message', {mine,frnd}).then(
+  // delete chat history
+  function deleteHistory(mine, frnd) {
+    axios.post('http://localhost:3000/delete-all-message', { mine, frnd }).then(
       (res) => {
         alert(res.data.data);
       })
-}
+  }
 
 
 
@@ -758,12 +829,12 @@ function deleteHistory(mine,frnd){
                             <form>
                               <div className="upload">
                                 <div className="data">
-                                  {/* <img className="avatar-xl" src="dist/img/avatars/default.png" alt="image" /> */}
                                   <img className="avatar-xl" src={userImage ? `http://localhost:3000/${userImage}` : "dist/img/avatars/default.png"} alt="image" />
                                   <label>
-                                    <input type="file" onChange={(e) => { setProfile(e) }} />
-                                    <span className="btn button">Upload avatar</span>  {/* {uploadPercentage} %uploaded */}
+                                    <input type="file" accept="image/png,image/jpg,image/jpeg" onChange={(e) => { setProfile(e) }} />
+                                    <span className="btn button mr-3">Upload</span>  {/* {uploadPercentage} %uploaded */}
                                   </label>
+                                  <button type="button" className="btn button w-50 ml-3 bg-green" onClick={updateProfile}>Set</button>
                                 </div>
                                 <p>For best results, use an image at least 256px by 256px in either .jpg or .png format!</p>
                               </div>
@@ -773,18 +844,14 @@ function deleteHistory(mine,frnd){
                                   <label htmlFor="Name">Name <span>*</span></label>
                                   <input type="text" name="Uname" value={uname} onChange={(e) => { setValue(e) }} className="form-control" id="Name" placeholder="Name" required />
                                 </div>
-                                {/* <div className="field">
+                                <div className="field">
                                   <label htmlFor="username">username<span>*</span></label>
-                                  <input type="text" name="Uusername" value={uusername} onChange={(e) => { setValue(e) }} className="form-control" id="username" placeholder="username" required />
-                                </div> */}
+                                  <input type="text" name="Uusername" value={uusername} onChange={(e) => { setValue(e) }} className="form-control" id="username" placeholder="username" disabled />
+                                </div>
                               </div>
                               <div className="field">
                                 <label htmlFor="email">Email <span>*</span></label>
                                 <input type="email" name="Uemail" value={uemail} onChange={(e) => { setValue(e) }} className="form-control" id="email" placeholder="Enter your email address" required />
-                              </div>
-                              <div className="field">
-                                <label htmlFor="password">New Password</label>
-                                <input type="password" name="Upassword" value={upassword} onChange={(e) => { setValue(e) }} className="form-control" id="password" placeholder="Enter a new password" required />
                               </div>
                               {/* <div className="field">
                                 <label htmlFor="location">Location</label>
@@ -793,6 +860,26 @@ function deleteHistory(mine,frnd){
                               <button className="btn btn-link w-100">Delete Account</button> */}
                               <button type="button" className="btn button w-100" onClick={updateDetails} >Apply Changes</button>
                             </form>
+
+                            <details className='text-dark' style={{ marginTop: '2rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                              <summary style={{ fontSize: '1em' }}>Change Password</summary>
+                              <form>
+                                <div className="field">
+                                  <label htmlFor="password">Old Password</label>
+                                  <input type="password" name="oldpassword" value={oldpassword} onChange={(e) => { setValue(e) }} className="form-control" id="password" placeholder="Enter a new password" required />
+                                </div>
+                                <div className="field">
+                                  <label htmlFor="password">New Password</label>
+                                  <input type="password" name="newpassword" value={newpassword} onChange={(e) => { setValue(e) }} className="form-control" id="password" placeholder="Enter a new password" required />
+                                </div>
+                                <div className="field">
+                                  <label htmlFor="password">Re-enter New Password</label>
+                                  <input type="password" name="re-enter-new-password" value={reenternewpassword} onChange={(e) => { setValue(e) }} className="form-control" id="password" placeholder="Enter a new password" required />
+                                </div>
+                                <button type="button" className="btn button w-100" onClick={changePassword} >Change Password</button>
+                              </form>
+                            </details>
+
                           </div>
                         </div>
                       </div>
@@ -932,8 +1019,8 @@ function deleteHistory(mine,frnd){
                         <div className="dropdown">
                           <button className="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i className="material-icons md-30">more_vert</i></button>
                           <div className="dropdown-menu dropdown-menu-right">
-                            <button onClick={()=>{deleteHistory(myUsername.userUserName,chatUsername)}} className="dropdown-item"><i className="material-icons">delete_forever</i>Clear Chat History</button>
-                            <button onClick={()=>{unfriend(myUsername.userUserName,chatUsername)}} className="dropdown-item"><i className="material-icons">remove_circle</i>Unfriend {chatUsername}</button>
+                            <button onClick={() => { deleteHistory(myUsername.userUserName, chatUsername) }} className="dropdown-item"><i className="material-icons">delete_forever</i>Clear Chat History</button>
+                            <button onClick={() => { unfriend(myUsername.userUserName, chatUsername) }} className="dropdown-item"><i className="material-icons">remove_circle</i>Unfriend {chatUsername}</button>
                           </div>
                         </div>
                       </div>
