@@ -145,33 +145,6 @@ app.post('/user-by-email', bodyParser.json(), (req, res) => {
     })
 })
 
-// app.post('/update-user', (req, res) => {
-//     // console.log("103--------------");
-//     upload(req, res, (err) => {
-//         if (err) {
-//             console.log("Error Occured during upload ");
-//             console.log(err);
-//             res.send({ status: "failed", data: err });
-//         }
-//         else {
-//             console.log("111---------------")
-//             var userCollection = connection.db('buddyup').collection('users');
-//             console.log("files", req.files);
-//             // console.log("line 47");
-//             console.log(req.body);
-
-//             userCollection.update({ _id: ObjectId(req.body._id) }, { $set: { profile: req.files.profile[0].filename, uname: req.body.uname, uemail: req.body.uemail, uusername: req.body.uusername, upassword: req.body.upassword } }, (err, result) => {
-//                 if (!err) {
-//                     res.send({ status: "success", data: "user details updated sucessfully" });
-//                 }
-//                 else {
-//                     res.send({ status: "failed", data: err });
-//                 }
-//             })
-//         }
-//     });
-// })
-
 app.post('/update-user', bodyParser.json(), (req, res) => {
     var userCollection = connection.db('buddyup').collection('users');
     // console.log(req.body);
@@ -240,6 +213,19 @@ app.post('/add-friend', bodyParser.json(), (req, res) => {
                 res.send({ status: "failed", data: "some error occured" });
             }
         })
+});
+
+app.post('/search-for-user', bodyParser.json(), (req, res) => {
+    // console.log(req.body);
+    const collection = connection.db('buddyup').collection('users');
+    collection.find({ uusername: (req.body.friend) }).toArray((err, docs) => {
+        if (!err) {
+            res.send({ status: "ok", data: docs });
+        }
+        else {
+            res.send({ status: "failed", data: "some error occured" });
+        }
+    })
 });
 
 app.post('/get-notif', bodyParser.json(), (req, res) => {

@@ -18,7 +18,7 @@ function Chatpage(props) {
   const userUserName = useSelector(state => state.user.uusername);
   const userPassword = useSelector(state => state.user.upassword);
   const userEmail = useSelector(state => state.user.uemail);
-  const userImage = useSelector(state => state.user.profile);
+  var userImage = useSelector(state => state.user.profile);
 
   const [uname, setuname] = useState(userName);
   const [uemail, setuemail] = useState(userEmail);
@@ -50,8 +50,6 @@ function Chatpage(props) {
     console.log(profile);
   }
 
-
-
   function updateProfile() {
     if (profile != undefined) {
       var formData = new FormData();
@@ -64,58 +62,21 @@ function Chatpage(props) {
         },
         onUploadProgress: function (progressEvent) {
           console.log("file Uploading Progresss.......");
-          console.log(progressEvent);
+          // console.log(progressEvent);
           setuploadPercentage(parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100)));
           //   setfileInProgress(progressEvent.fileName)
         }
       }).then((res) => {
         alert(res.data.data);
+        userImage = profile;
       }).catch(res => {
         alert("Some issue occur while updating your profile");
       });
     }
     else {
-      console.log("please choose profile");
+      alert("please choose profile");
     }
   }
-
-  // function setProfile(e) {
-  //   // setprofile(e.target.files[0])
-  //   profile = e.target.files[0];
-  //   console.log(profile + userId);
-  //   var abc = { profile, userId };
-  //   console.log(abc);
-  //   axios.post('http://localhost:3000/update-profile', abc).then((res) => {
-  //     alert(res.data.data);
-  //   }).catch(res => {
-  //     alert("pic not updated :(");
-  //   })
-  // }
-
-  // function updateProfile() {
-  //   // var formData = new FormData();
-  //   // formData.append("profile", profile);
-  //   // formData.append("_id", userId);
-  //   console.log(profile);
-  //   // var formData = {profile,userId};
-  //   // console.log(formData);
-  //   // console.log(profile);
-  //   // axios.post('http://localhost:3000/update-profile', formData).then((res) => {
-  //   //   alert(res.data.data);
-  //   // }).catch(res => {
-  //   //   alert("pic not updated :(");
-  //   // })
-  //   // axios.post('http://localhost:3000/update-profile', formData,{
-  //   //  headers: {
-  //   //       'Content-Type': 'multipart/form-data'
-  //   //     }
-  //   //   }).then((res) => {
-  //   //   alert(res.data.data);
-  //   // }).catch(res => {
-  //   //   alert("Profile pic not updated :( ");
-  //   // })
-  // }
-
 
   function updateDetails() {
     var updateUserDetails = { userId, uname, uemail };
@@ -128,18 +89,27 @@ function Chatpage(props) {
 
   function changePassword() {
     if (userPassword == oldpassword) {
-      if (newpassword == reenternewpassword) {
-        axios.post('http://localhost:3000/update-password', { userId, reenternewpassword }).then((res) => {
-          alert(res.data.data);
-          setoldpassword('');
-          setnewpassword('');
-          setreenternewpassword('');
-        }).catch(res => {
-          alert("Password not changed :( ");
-        })
+      var isvalid = true;
+      //validate for password
+      var passregex = /(?=(.*[0-9]))(?=.*[\!@#$%^&*()\\[\]{}\-_+=~`|:;"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}/;
+      if (!passregex.test(newpassword)) {
+        alert("Password should have 1 lowercase letter, 1 uppercase letter, 1 number, 1 special character and be at least 8 characters long");
+        isvalid = false;
       }
-      else {
-        alert("New password not match with re-enter new password")
+      if (isvalid == true) {
+        if (newpassword == reenternewpassword) {
+          axios.post('http://localhost:3000/update-password', { userId, reenternewpassword }).then((res) => {
+            alert(res.data.data);
+            setoldpassword('');
+            setnewpassword('');
+            setreenternewpassword('');
+          }).catch(res => {
+            alert("Password not changed :( ");
+          })
+        }
+        else {
+          alert("New password not match with re-enter new password")
+        }
       }
     }
     else {
@@ -148,18 +118,51 @@ function Chatpage(props) {
   }
 
   function addFriend() {
-    // console.log(friend);
-    // console.log(userUserName);
-    var addfrnd = { friend, userUserName };
-    // console.log(addfrnd);
-    if (friend != userUserName) {
-      axios.post('http://localhost:3000/add-friend', addfrnd).then((res) => {
-        alert(res.data.data);
-        setfriend('');
-      })
+    if (friend != "") {
+      if (friend != userUserName) {
+        axios.post('http://localhost:3000/search-for-user', { friend }).then(
+          (res) => {
+            if (res.data.data.length > 0) {
+              axios.post('http://localhost:3000/get-notif', myUsername).then(
+                (res) => {
+                  if (res.data.data[0].friends) {
+                    if (res.data.data[0].friends.length >= 1) {
+                      var forUnique = res.data.data[0].friends.map((a) => { return a.name });
+                      var status = forUnique.some(elem => elem === friend);
+                      if (status == true) {
+                        alert("you cant send friend request again")
+                      }
+                      else {
+                        // id validation that user exist or not
+                        var addfrnd = { friend, userUserName };
+                        axios.post('http://localhost:3000/add-friend', addfrnd).then((res) => {
+                          alert(res.data.data);
+                          setfriend('');
+                        })
+                      }
+                    }
+                  }
+                  else {
+                    var addfrnd = { friend, userUserName };
+                    axios.post('http://localhost:3000/add-friend', addfrnd).then((res) => {
+                      alert(res.data.data);
+                      setfriend('');
+                    })
+
+                  }
+                })
+            }
+            else {
+              alert("User not found. Please enter correct username.")
+            }
+          })
+      }
+      else {
+        alert("You can't send you a request. 🥱")
+      }
     }
     else {
-      alert("You can't send you a request. 🥱");
+      alert("enter frnd's username");
     }
   }
 
@@ -435,129 +438,13 @@ function Chatpage(props) {
                       <input type="search" className="form-control" id="people" placeholder="Search for people..." />
                       <button type="button" className="btn btn-link loop"><i className="material-icons">search</i></button>
                     </form>
-                    <button className="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i className="material-icons">person_add</i></button>
+                    {/* <button className="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i className="material-icons">person_add</i></button> */}
                   </div>
                   <div className="contacts">
                     <h1>Chats</h1>
                     {friendList.length != 0 && <div className="list-group" id="contacts" role="tablist">
                       {friendList}
-                      {/* <a href="#" className="filterMembers all online contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Janette Dalton</h5>
-                        <p>Sofia, Bulgaria</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all online contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-1.jpg" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Michael Knudsen</h5>
-                        <p>Washington, USA</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all online contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Lean Avent</h5>
-                        <p>Shanghai, China</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all online contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-2.jpg" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Mariette Toles</h5>
-                        <p>Helena, Montana</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all online contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-3.jpg" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Harmony Otero</h5>
-                        <p>Indore, India</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all offline contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Keith Morris</h5>
-                        <p>Chisinau, Moldova</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all offline contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Louis Martinez</h5>
-                        <p>Vienna, Austria</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all offline contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-3.jpg" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Ryan Foster</h5>
-                        <p>Oslo, Norway</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a>
-                    <a href="#" className="filterMembers all offline contact" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-4.jpg" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Mildred Bennett</h5>
-                        <p>London, United Kingdom</p>
-                      </div>
-                      <div className="person-add">
-                        <i className="material-icons">person</i>
-                      </div>
-                    </a> */}
+
                     </div>}
                     {friendList.length == 0 && <div className="list-group" id="contacts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
                       <p style={{ textAlign: "center" }}> Start Chatting to friends by sending them friend requests. </p>
@@ -565,133 +452,7 @@ function Chatpage(props) {
                   </div>
                 </div>
                 {/* End of Contacts */}
-                {/* Start of Discussions
-              <div id="discussions" className="tab-pane fade active show">
-                <div className="search">
-                  <form className="form-inline position-relative">
-                    <input type="search" className="form-control" id="conversations" placeholder="Search for conversations..." />
-                    <button type="button" className="btn btn-link loop"><i className="material-icons">search</i></button>
-                  </form>
-                  <button className="btn create" data-toggle="modal" data-target="#startnewchat"><i className="material-icons">create</i></button>
-                </div>
-                <div className="discussions">
-                  <h1>Discussions</h1>
-                  <div className="list-group" id="chats" role="tablist">
-                    <a href="#list-chat" className="filterDiscussions all unread single active" id="list-chat-list" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="new bg-yellow">
-                        <span>+7</span>
-                      </div>
-                      <div className="data">
-                        <h5>Janette Dalton</h5>
-                        <span>Mon</span>
-                        <p>A new feature has been updated to your account. Check it out...</p>
-                      </div>
-                    </a>
-                    <a href="#list-empty" className="filterDiscussions all unread single" id="list-empty-list" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-1.jpg" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="new bg-pink">
-                        <span>+10</span>
-                      </div>
-                      <div className="data">
-                        <h5>Michael Knudsen</h5>
-                        <span>Sun</span>
-                        <p>How can i improve my chances of getting a deposit?</p>
-                      </div>
-                    </a>
-                    <a href="#list-chat" className="filterDiscussions all read single" id="list-chat-list2" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Lean Avent</h5>
-                        <span>Tus</span>
-                        <p>Hey Chris, could i ask you to help me out with variation...</p>
-                      </div>
-                    </a>
-                    <a href="#list-empty" className="filterDiscussions all read single" id="list-empty-list2" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-2.jpg" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Mariette Toles</h5>
-                        <span>5 mins</span>
-                        <p>By injected humour, or randomised words which...</p>
-                      </div>
-                    </a>
-                    <a href="#list-chat" className="filterDiscussions all read single" id="list-chat-list3" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-3.jpg" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Harmony Otero</h5>
-                        <span>Mon</span>
-                        <p>No more running out of the office at 4pm on Fridays!</p>
-                      </div>
-                    </a>
-                    <a href="#list-empty" className="filterDiscussions all read single" id="list-empty-list3" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Keith Morris</h5>
-                        <span>Fri</span>
-                        <p>All your favourite books at your reach! We are now mobile.</p>
-                      </div>
-                    </a>
-                    <a href="#list-request" className="filterDiscussions all unread single" id="list-request-list" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="new bg-gray">
-                        <span>?</span>
-                      </div>
-                      <div className="data">
-                        <h5>Louis Martinez</h5>
-                        <span>Feb 10</span>
-                        <p>Hi Keith, I'd like to add you as a contact.</p>
-                      </div>
-                    </a>
-                    <a href="#list-empty" className="filterDiscussions all read single" id="list-empty-list4" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-3.jpg" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <h5>Ryan Foster</h5>
-                        <span>Feb 9</span>
-                        <p>Dear Deborah, your Thai massage is today at 5pm.</p>
-                      </div>
-                    </a>
-                    <a href="#list-chat" className="filterDiscussions all unread single" id="list-chat-list5" data-toggle="list" role="tab">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-4.jpg" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="new bg-green">
-                        <span>+9</span>
-                      </div>
-                      <div className="data">
-                        <h5>Mildred Bennett</h5>
-                        <span>Thu</span>
-                        <p>Unfortunately your session today has been cancelled!</p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-              </div> */}
-                {/* End of Discussions */}
+
                 {/* Start of Notifications */}
                 <div id="notifications" className="tab-pane fade">
                   <div className="search">
@@ -699,101 +460,13 @@ function Chatpage(props) {
                       <input type="search" className="form-control" id="notice" placeholder="Enter Username to add friends..." />
                       <button type="button" className="btn btn-link loop"><i className="material-icons">person_add</i></button>
                     </form>
+                    <button className="btn create" data-toggle="modal" data-target="#exampleModalCenter"><i className="material-icons">person_add</i></button>
                   </div>
                   <div className="notifications">
                     <h1>Friend requests</h1>
                     {mainnotif.length != 0 && <div className="list-group" id="alerts" role="tablist">
                       {mainnotif}
-                      {/* <a href="#" className="filterNotifications all latest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-1.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Janette has accepted your friend request on Swipe.</p>
-                        <span>Oct 17, 2018</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all latest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-1.jpg" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Michael, you have a new friend suggestion today.</p>
-                        <span>Jun 21, 2018</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all latest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-2.jpg" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Mariette have just sent you a new message.</p>
-                        <span>Feb 15, 2018</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all latest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-6.jpg" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Louis has a birthday today. Wish her all the best.</p>
-                        <span>Mar 23, 2018</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all latest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-3.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons online">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Harmony has accepted your friend request on Swipe.</p>
-                        <span>Jan 5, 2018</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all oldest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Keith have just sent you a new message.</p>
-                        <span>Dec 22, 2017</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all oldest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-female-2.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Michael, you have a new friend suggestion today.</p>
-                        <span>Nov 29, 2017</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all oldest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-3.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Ryan have just sent you a new message.</p>
-                        <span>Sep 31, 2017</span>
-                      </div>
-                    </a>
-                    <a href="#" className="filterNotifications all oldest notification" data-toggle="list">
-                      <img className="avatar-md" src="dist/img/avatars/avatar-male-4.jpg" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar" />
-                      <div className="status">
-                        <i className="material-icons offline">fiber_manual_record</i>
-                      </div>
-                      <div className="data">
-                        <p>Mildred has a birthday today. Wish him all the best.</p>
-                        <span>Jul 19, 2017</span>
-                      </div>
-                    </a> */}
+
                     </div>}
 
                     {mainnotif.length == 0 && <div className="list-group" id="alerts" role="tablist" style={{ height: '78vh', fontFamily: 'Seoge UI', fontSize: '20px', fontWeight: '400', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
@@ -1079,120 +752,6 @@ function Chatpage(props) {
                       })()}
                       <div ref={messagesEndRef}></div>
 
-                      {/* <div className="message">
-                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                        <div className="text-main">
-                          <div className="text-group">
-                            <div className="text">
-                              <p>We've got some killer ideas kicking about already.</p>
-                            </div>
-                          </div>
-                          <span>09:46 AM</span>
-                        </div>
-                      </div>
-                      <div className="message me">
-                        <div className="text-main">
-                          <div className="text-group me">
-                            <div className="text me">
-                              <p>Can't wait! How are we coming along with the client?</p>
-                            </div>
-                          </div>
-                          <span>11:32 AM</span>
-                        </div>
-                      </div>
-                      <div className="message">
-                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                        <div className="text-main">
-                          <div className="text-group">
-                            <div className="text">
-                              <p>Coming along nicely, we've got a draft for the client quarries completed.</p>
-                            </div>
-                          </div>
-                          <span>02:56 PM</span>
-                        </div>
-                      </div>
-                      <div className="message me">
-                        <div className="text-main">
-                          <div className="text-group me">
-                            <div className="text me">
-                              <p>Roger that boss!</p>
-                            </div>
-                          </div>
-                          <div className="text-group me">
-                            <div className="text me">
-                              <p>I have already started gathering some stuff for the mood boards, excited to start!</p>
-                            </div>
-                          </div>
-                          <span>10:21 PM</span>
-                        </div>
-                      </div>
-                      <div className="message">
-                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                        <div className="text-main">
-                          <div className="text-group">
-                            <div className="text">
-                              <p>Great start guys, I've added some notes to the task. We may need to make some adjustments to the last couple of items - but no biggie!</p>
-                            </div>
-                          </div>
-                          <span>11:07 PM</span>
-                        </div>
-                      </div>
-                      <div className="date">
-                        <hr />
-                        <span>Today</span>
-                        <hr />
-                      </div>
-                      <div className="message me">
-                        <div className="text-main">
-                          <div className="text-group me">
-                            <div className="text me">
-                              <p>Well done all. See you all at 2 for the kick-off meeting.</p>
-                            </div>
-                          </div>
-                          <span>10:21 PM</span>
-                        </div>
-                      </div>
-                      <div className="message">
-                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                        <div className="text-main">
-                          <div className="text-group">
-                            <div className="text">
-                              <div className="attachment">
-                                <button className="btn attach"><i className="material-icons md-18">insert_drive_file</i></button>
-                                <div className="file">
-                                  <h5><a href="#">Tenacy Agreement.pdf</a></h5>
-                                  <span>24kb Document</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <span>11:07 PM</span>
-                        </div>
-                      </div>
-                      <div className="message me">
-                        <div className="text-main">
-                          <div className="text-group me">
-                            <div className="text me">
-                              <p>Hope you're all ready to tackle this great project. Let's smash some Brand Concept &amp; Design!</p>
-                            </div>
-                          </div>
-                          <span><i className="material-icons">check</i>10:21 PM</span>
-                        </div>
-                      </div>
-                      <div className="message">
-                        <img className="avatar-md" src="dist/img/avatars/avatar-female-5.jpg" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar" />
-                        <div className="text-main">
-                          <div className="text-group">
-                            <div className="text typing">
-                              <div className="wave">
-                                <span className="dot" />
-                                <span className="dot" />
-                                <span className="dot" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div> */}
                       <div className="picker-container" style={{ position: 'relative', width: '100%' }}>
                         {showPicker && <Picker pickerStyle={{ width: '100%', height: '30vh' }} onEmojiClick={onEmojiClick} />}
                       </div>
